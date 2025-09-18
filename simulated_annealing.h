@@ -1,0 +1,8 @@
+//
+// Created by david on 9/17/25.
+//
+
+#ifndef HALAL_SIMULATED_ANNEALING_H
+#define HALAL_SIMULATED_ANNEALING_H
+
+#endif //HALAL_SIMULATED_ANNEALING_H
