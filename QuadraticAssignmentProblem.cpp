@@ -5,168 +5,135 @@
 #include "QuadraticAssignmentProblem.h"
 #include <random>
 #include <unordered_set>
+#include <algorithm>
 
-template<typename T>
-float FrobeniusNorm(const vector<vector<T> > & matrix) {
-    float sum = 0.0;
-    for (auto row : matrix) {
-        for (auto x : row) {
-            sum += x * x;
-        }
-    }
-    return std::sqrt(sum);
-}
-
-vector<vector<float> > RandomPerturbationMatrix(int n) {
-    std::random_device rnd;
-    std::mt19937 gen {rnd()};
-    std::normal_distribution<float> dist(0.0, 1.0);
-
-    auto matrix = vector(n, vector<float>(n));
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            matrix[i][j] = dist(gen);
-        }
-    }
-
-    return matrix;
-}
-
-int CantorPair(const int a, const int b) {
-    return 0.5 * (a + b) * (a + b + 1) + b;
-}
-
-
-assignment::assignment(const std::pair<int, int> &fac, const std::pair<int, int> &loc,
-                                                   const vector<vector<float> > &w, const vector<vector<int> > &d) {
-    this->facilities = fac;
-    this->locations = loc;
-    this->weightMatrixPtr = &w;
-    this->distanceMatrixPtr = &d;
-}
-
-QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n) {
+QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n) : weight_matrix(n), distance_matrix(n) {
     this->n = n;
-    this->maxDrought = 10;
-    this->droughtRadius = 0.2;
+    this->max_drought = 5;
+    this->drought_radius = 100;
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_real_distribution<float> weight_dist(0.1, 10.0);
-    std::uniform_int_distribution<> dist_dist(5, 40);
+    std::uniform_real_distribution<float> dist_dist(5.0, 40.0);
 
-    int k = 0;
-    weightMatrix = vector(n, vector<float>(n, 0.0));
-    distanceMatrix = vector(n, vector<int>(n, 0.0));
+    int k = 1;
+    this->weight_matrix = symmetric_matrix<float>(n);
+    this->distance_matrix = symmetric_matrix<float>(n);
     for (int i = 0; i < n; ++i) {
+        weight_matrix(i, i) = 0;
+        distance_matrix(i, i) = 0;
         for (int j = k; j < n; ++j) {
-            weightMatrix[i][j] = weight_dist(gen);
-            weightMatrix[j][i] = weight_dist(gen);
-            distanceMatrix[i][j] = dist_dist(gen);
-            distanceMatrix[j][i] = dist_dist(gen);
+            weight_matrix(i, j) = weight_dist(gen);
+            distance_matrix(i, j) = dist_dist(gen);
         }
         k++;
     }
 }
 
-quadratic_assignment QuadraticAssignmentProblem::GenerateAssignment() const {
+std::vector<int> QuadraticAssignmentProblem::GenerateAssignment() const {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> dist(0, this->n - 1);
 
-    std::unordered_set<assignment *> assigned;
-    auto elemCount = 0;
-    while (elemCount < this->n) {
-        auto fac_x = dist(gen);
-        auto fac_y = dist(gen);
-        auto loc_x = dist(gen);
-        auto loc_y = dist(gen);
-        const auto ass = new assignment{
-            std::pair(fac_x, fac_y), std::pair(loc_x, loc_y), this->weightMatrix, this->distanceMatrix
-        };
-
-        if (assigned.find(ass) == assigned.end()) {
-            assigned.insert(ass);
-            elemCount++;
-        } else {
-            delete ass;
+    std::unordered_set<int> used_facilities;
+    auto bijection = std::vector<int>(n);
+    for (int i = 0; i < n; ++i) {
+        bool available = true;
+        while (available) {
+            auto facility = dist(gen);
+            if (used_facilities.find(facility) == used_facilities.end()) {
+                bijection[i] = facility;
+                used_facilities.insert(facility);
+                available = false;
+            }
         }
     }
-    vector<assignment> v;
-    for (auto a: assigned) {
-        v.push_back(*a);
-    }
-    return quadratic_assignment{v};
+    return bijection;
 }
 
-std::pair<int, int> RandomLocation(const quadratic_assignment &p, const int &n) {
+std::vector<int> QuadraticAssignmentProblem::GenerateNeighbour(const std::vector<int>& p, const int& eps) const {
     std::random_device rnd;
-    std::mt19937 gen{rnd()};
-    std::uniform_int_distribution<> int_dist(0, n - 1);
+    std::mt19937 gen {rnd()};
+    std::uniform_int_distribution<> dist(0, n-1);
 
-    const auto idx = int_dist(gen);
+    std::vector<int> q = p;
+    auto indices = std::vector<int>(eps);
 
-    const auto &point = p.quad[idx];
-    const auto &[h, k] = point.locations;
-    return {h, k};
-}
+    const auto used = new std::unordered_set<int>();
 
-float RandomRadius(const float &eps) {
-    std::random_device rnd;
-    std::mt19937 gen{rnd()};
-    std::uniform_real_distribution<float> dist(1.0, eps);
-    return dist(gen);
-}
-
-vector<vector<int> > QuadraticAssignmentProblem::CantorPairMatrix(vector<assignment> quad) {
-}
-
-
-quadratic_assignment QuadraticAssignmentProblem::GenerateNeighbour(
-    const quadratic_assignment &p, const float &eps) const {
-
-
-    auto perturb = RandomPerturbationMatrix(p.quad.size());
-
-}
-
-
-float QuadraticAssignmentProblem::Objective(const quadratic_assignment &q) const {
-    float sum = 0;
-    for (auto assignment: q.quad) {
-        auto [f1, f2] = assignment.facilities;
-        auto [l1, l2] = assignment.locations;
-        sum += this->weightMatrix[f1][f2] * this->distanceMatrix[l1][l2];
+    for (int i = 0; i < eps; ++i) {
+        auto idx = dist(gen);
+        bool b = true;
+        while (b) {
+            if (used->find(idx) == used->end()) {
+                indices[i] = idx;
+                used->insert(idx);
+                b = false;
+            } else {
+                idx = dist(gen);
+            }
+        }
     }
 
-    currentFitness = sum;
-
-    if (sum < bestFitness) {
-        bestFitness = sum;
+    delete used;
+    const auto values = new std::vector<int>();
+    for (const auto idx : indices) {
+        values->push_back(p[idx]);
     }
 
+    std::shuffle(values->begin(), values->end(), gen);
+
+    int j = 0;
+    for (const auto index: indices) {
+        int val = values->at(j);
+        auto tmp_it = std::find(q.begin(), q.end(), val);
+        auto tmp_idx = std::distance(q.begin(), tmp_it);
+        auto tmp = q[index];
+        q[index] = values->at(j);
+        q[tmp_idx] = tmp;
+        j++;
+    }
+
+    delete values;
+
+    return q;
+}
+
+
+float QuadraticAssignmentProblem::Objective(const std::vector<int> &p) const {
+    float sum = 0.0;
+    int h = 1;
+    for (int i = 0; i < n; ++i) {
+        for (int j = h; j < n; ++j) {
+            std::pair<int, int> facilities;
+            int count = 0;
+            for (int k = 0; k < n; ++k) {
+                if (k == i) {
+                    facilities.first = p[k];
+                    count++;
+                } else if (k == j) {
+                    facilities.second = p[k];
+                    count++;
+                }
+                if (count == 2) {
+                    break;
+                }
+            }
+            sum += weight_matrix(facilities.first, facilities.second) * distance_matrix(i, j);
+        }
+        h++;
+    }
+    current_fitness = sum;
     return sum;
 }
 
 bool QuadraticAssignmentProblem::StopSearch() const {
-    if (fabsf(currentFitness - bestFitness) < droughtRadius) {
-        droughtCount++;
+    if (fabsf(current_fitness - last_fitness) < drought_radius) {
+        drought_count++;
     } else {
-        droughtCount = 0;
+        drought_count = 0;
     }
-    if (droughtCount >= maxDrought) {
-        return true;
-    }
-    return false;
+    last_fitness = current_fitness;
+    return drought_count >= max_drought;
 }
 
-std::pair<quadratic_assignment, float> QuadraticAssignmentProblem::StochasticHillClimb(
-    const int &eps) const {
-    auto p = GenerateAssignment();
-    while (!StopSearch()) {
-        if (auto q = GenerateNeighbour(p, eps); Objective(q) < Objective(p)) {
-            p = q;
-        }
-    }
-
-    return {p, bestFitness};
-}

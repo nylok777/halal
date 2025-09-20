@@ -1,25 +1,10 @@
+#include "hillclimb.h"
 #include <vector>
 #include <random>
 #include <functional>
+#include <iostream>
 using std::vector;
 using std::function;
-
-template<typename T>
-T StochasticHillClimb(vector<T> domain, float epsilon, function<T(T, vector<T>, float)> distance,
-                      function<float(T)> fitness, const function<bool()> &stopCondition) {
-    std::random_device rnd;
-    std::mt19937 gen{rnd()};
-    std::uniform_int_distribution<> range = new std::uniform_int_distribution(0, domain.size() - 1);
-    auto element = domain[range(gen)];
-    while (!stopCondition()) {
-        auto neighbour = distance(element, domain, epsilon);
-        if (fitness(neighbour) < fitness(element)) {
-            element = neighbour;
-        }
-    }
-
-    return element;
-}
 
 template<typename T>
 T SteepestAscentHillClimb(vector<T> domain, float epsilon, function<vector<T>(T, vector<T>, float)> distance,
