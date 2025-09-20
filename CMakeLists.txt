@@ -10,7 +10,7 @@ add_executable(halal
         hillclimb.h
         simulated_annealing.cpp
         simulated_annealing.h
-        QuadraticAssignment.cpp
-        QuadraticAssignment.h
+        QuadraticAssignmentProblem.cpp
+        QuadraticAssignmentProblem.h
         main.cpp
 )

@@ -11,44 +11,35 @@ using std::set;
 using std::vector;
 using std::function;
 
-template <typename T>
-T SimulatedAnnealing(const set<T> domain, const float& eps, const float& kB,
-                     function<T*(T, const set<T>&, float)> distance,
-                     function<float(const T&)> fitness, const function<bool()>& stopCondition,
-                     const function<float(const int&)>& temperature)
-{
+template<typename T>
+T SimulatedAnnealing(const vector<T> domain, const float &eps, const float &kB,
+                     function<T(T, const vector<T> &, float)> distance,
+                     function<float(const T &)> fitness, const function<bool()> &stopCondition,
+                     const function<float(const int &)> &temperature) {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
-    std::uniform_int_distribution<> range = new std::uniform_int_distribution(0, domain.size() - 1);
-    std::uniform_real_distribution<> realRange;
+    std::uniform_int_distribution<> int_range(0, domain.size() - 1);
+    std::uniform_real_distribution<> real_range;
 
-    const T* element = domain[range(gen)];
-    const T* optElement = element;
+    const auto p = domain[int_range(gen)];
+    const auto best_element = p;
     int t = 0;
-    while (!stopCondition())
-    {
+    while (!stopCondition()) {
         t++;
-        const T* neighbour = distance(*element, domain, eps);
-        auto elemFitness = fitness(*element);
-        auto neighbourFitness = fitness(*neighbour);
-        auto deltaE = neighbourFitness - elemFitness;
-        if (deltaE <= 0)
-        {
-            element = neighbour;
-            if (neighbourFitness < fitness(*optElement))
-            {
-                optElement = neighbour;
+        const auto q = distance(p, domain, eps);
+        const float p_fitness = fitness(p);
+        float q_fitness = fitness(q);
+        if (const auto delta_e = q_fitness - p_fitness; delta_e <= 0) {
+            p = q;
+            if (q_fitness < fitness(best_element)) {
+                best_element = q;
             }
-        }
-        else
-        {
-            auto r = (deltaE / kB * temperature(t));
-            auto p = exp(r);
-            if (realRange(gen) < p)
-            {
-                element = neighbour;
+        } else {
+            const auto r = delta_e / kB * temperature(t);
+            if (const auto x = exp(r); real_range(gen) < x) {
+                p = q;
             }
         }
     }
-    return *optElement;
+    return best_element;
 }
