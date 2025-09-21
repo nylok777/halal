@@ -10,6 +10,10 @@ add_executable(halal
         QuadraticAssignmentProblem.cpp
         QuadraticAssignmentProblem.h
         main.cpp
-        SimulatedAnnealingSolvable.h
+        SimulatedAnnealingSolver.h
         Solvable.h
+        GeneticSolver.h
+        GeneticSolver.cpp
+        GeneticSolvable.h
+        SimulatedAnnealingSolver.cpp
 )

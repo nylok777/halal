@@ -7,7 +7,9 @@
 #define HALAL_QUADRATICASSIGNMENT_H
 #include <cmath>
 #include <vector>
-#include "SimulatedAnnealingSolvable.h"
+
+#include "GeneticSolver.h"
+#include "SimulatedAnnealingSolver.h"
 
 template<typename T>
 struct symmetric_matrix {
@@ -30,7 +32,7 @@ public:
 
 };
 
-class QuadraticAssignmentProblem: public SimulatedAnnealingSolvable<int, std::vector<int>, int>
+class QuadraticAssignmentProblem: public GeneticSolvable<std::vector<int>>
 {
     int n;
     mutable float last_fitness = std::numeric_limits<float>::max();
@@ -45,16 +47,14 @@ public:
     virtual ~QuadraticAssignmentProblem() = default;
 
     explicit QuadraticAssignmentProblem(int n);
-    QuadraticAssignmentProblem(int n, int temp0);
-    QuadraticAssignmentProblem(std::string& filename, int temp0, int max_drought, float drought_radius);
+    QuadraticAssignmentProblem(std::string& filename, int max_drought, float drought_radius);
 
     std::vector<int> GenerateElement() const override;
-    std::vector<int> GenerateNeighbour(const std::vector<int>&, const int&) const override;
+    std::vector<int> GenerateNeighbour(const std::vector<int>&, float) const override;
 
     float Objective(const std::vector<int>&) const override;
     bool StopSearch() const override;
 
-    float BoltzmannScheduleTemperature(int) override;
 };
 
 

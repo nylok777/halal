@@ -31,13 +31,8 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n) : weight_mat
     }
 }
 
-QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n, const int temp0) : QuadraticAssignmentProblem(n) {
-    this->temp0 = temp0;
-}
-
-QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, int temp0, int max_drought,
+QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, int max_drought,
     float drought_radius) {
-    this->temp0 = temp0;
     this->max_drought = max_drought;
     this->drought_radius = drought_radius;
     std::ifstream in(filename);
@@ -86,17 +81,17 @@ std::vector<int> QuadraticAssignmentProblem::GenerateElement() const {
     return bijection;
 }
 
-std::vector<int> QuadraticAssignmentProblem::GenerateNeighbour(const std::vector<int>& p, const int& eps) const {
+std::vector<int> QuadraticAssignmentProblem::GenerateNeighbour(const std::vector<int>& p, float eps) const {
     std::random_device rnd;
     std::mt19937 gen {rnd()};
     std::uniform_int_distribution<> dist(0, n-1);
-
+    auto epsilon = static_cast<int>(eps);
     std::vector<int> q = p;
-    auto indices = std::vector<int>(eps);
+    auto indices = std::vector<int>(epsilon);
 
     auto used = std::unordered_set<int>();
 
-    for (int i = 0; i < eps; ++i) {
+    for (int i = 0; i < epsilon; ++i) {
         auto idx = dist(gen);
         bool b = true;
         while (b) {
@@ -148,8 +143,4 @@ bool QuadraticAssignmentProblem::StopSearch() const {
     }
     last_fitness = current_fitness;
     return drought_count >= max_drought;
-}
-
-float QuadraticAssignmentProblem::BoltzmannScheduleTemperature(const int t) {
-    return temp0 / std::log(t + 1);
 }
