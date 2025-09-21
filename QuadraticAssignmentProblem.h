@@ -7,6 +7,7 @@
 #define HALAL_QUADRATICASSIGNMENT_H
 #include <cmath>
 #include <vector>
+#include "SimulatedAnnealingSolvable.h"
 
 template<typename T>
 struct symmetric_matrix {
@@ -28,7 +29,7 @@ public:
     }
 };
 
-class QuadraticAssignmentProblem
+class QuadraticAssignmentProblem: public SimulatedAnnealingSolvable<int>
 {
     int n;
     mutable float last_fitness = std::numeric_limits<float>::max();
@@ -41,12 +42,15 @@ class QuadraticAssignmentProblem
 
 public:
     explicit QuadraticAssignmentProblem(int n);
+    QuadraticAssignmentProblem(int n, int temp0);
 
     [[nodiscard]] std::vector<int> GenerateAssignment() const;
     [[nodiscard]] std::vector<int> GenerateNeighbour(const std::vector<int>&, const int&) const;
 
     [[nodiscard]] float Objective(const std::vector<int>&) const;
     bool StopSearch() const;
+
+    float BoltzmannScheduleTemperature(int) override;
 };
 
 

@@ -30,6 +30,11 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n) : weight_mat
     }
 }
 
+QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n, const int temp0) : QuadraticAssignmentProblem(n) {
+    this->temp0 = temp0;
+}
+
+
 std::vector<int> QuadraticAssignmentProblem::GenerateAssignment() const {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
@@ -137,3 +142,6 @@ bool QuadraticAssignmentProblem::StopSearch() const {
     return drought_count >= max_drought;
 }
 
+float QuadraticAssignmentProblem::BoltzmannScheduleTemperature(const int t) {
+    return temp0 / std::log(t + 1);
+}
