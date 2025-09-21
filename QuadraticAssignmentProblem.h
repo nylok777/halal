@@ -27,9 +27,10 @@ public:
     const T& operator()(const int i, const int j) const {
         return data[index(i, j)];
     }
+
 };
 
-class QuadraticAssignmentProblem: public SimulatedAnnealingSolvable<int>
+class QuadraticAssignmentProblem: public SimulatedAnnealingSolvable<int, std::vector<int>, int>
 {
     int n;
     mutable float last_fitness = std::numeric_limits<float>::max();
@@ -37,18 +38,21 @@ class QuadraticAssignmentProblem: public SimulatedAnnealingSolvable<int>
     int max_drought;
     float drought_radius;
     mutable int drought_count = 0;
-    symmetric_matrix<float> weight_matrix;
-    symmetric_matrix<float> distance_matrix;
+    symmetric_matrix<float> weight_matrix{n};
+    symmetric_matrix<float> distance_matrix{n};
 
 public:
+    virtual ~QuadraticAssignmentProblem() = default;
+
     explicit QuadraticAssignmentProblem(int n);
     QuadraticAssignmentProblem(int n, int temp0);
+    QuadraticAssignmentProblem(std::string& filename, int temp0, int max_drought, float drought_radius);
 
-    [[nodiscard]] std::vector<int> GenerateAssignment() const;
-    [[nodiscard]] std::vector<int> GenerateNeighbour(const std::vector<int>&, const int&) const;
+    std::vector<int> GenerateElement() const override;
+    std::vector<int> GenerateNeighbour(const std::vector<int>&, const int&) const override;
 
-    [[nodiscard]] float Objective(const std::vector<int>&) const;
-    bool StopSearch() const;
+    float Objective(const std::vector<int>&) const override;
+    bool StopSearch() const override;
 
     float BoltzmannScheduleTemperature(int) override;
 };

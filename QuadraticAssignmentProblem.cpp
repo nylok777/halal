@@ -6,6 +6,7 @@
 #include <random>
 #include <unordered_set>
 #include <algorithm>
+#include <fstream>
 
 QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n) : weight_matrix(n), distance_matrix(n) {
     this->n = n;
@@ -34,8 +35,37 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n, const int te
     this->temp0 = temp0;
 }
 
+QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, int temp0, int max_drought,
+    float drought_radius) {
+    this->temp0 = temp0;
+    this->max_drought = max_drought;
+    this->drought_radius = drought_radius;
+    std::ifstream in(filename);
+    if (!in) {
+        throw std::runtime_error("Could not open file: " + filename);
+    }
+    int m;
+    in >> m;
+    this->n = m;
+    this->weight_matrix = symmetric_matrix<float>(n);
+    this->distance_matrix = symmetric_matrix<float>(n);
+    float val;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            in >> val;
+            weight_matrix(i, j) = val;
+        }
+    }
 
-std::vector<int> QuadraticAssignmentProblem::GenerateAssignment() const {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            in >> val;
+            distance_matrix(i, j) = val;
+        }
+    }
+}
+
+std::vector<int> QuadraticAssignmentProblem::GenerateElement() const {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> dist(0, this->n - 1);
@@ -64,15 +94,15 @@ std::vector<int> QuadraticAssignmentProblem::GenerateNeighbour(const std::vector
     std::vector<int> q = p;
     auto indices = std::vector<int>(eps);
 
-    const auto used = new std::unordered_set<int>();
+    auto used = std::unordered_set<int>();
 
     for (int i = 0; i < eps; ++i) {
         auto idx = dist(gen);
         bool b = true;
         while (b) {
-            if (used->find(idx) == used->end()) {
+            if (used.find(idx) == used.end()) {
                 indices[i] = idx;
-                used->insert(idx);
+                used.insert(idx);
                 b = false;
             } else {
                 idx = dist(gen);
@@ -80,53 +110,31 @@ std::vector<int> QuadraticAssignmentProblem::GenerateNeighbour(const std::vector
         }
     }
 
-    delete used;
-    const auto values = new std::vector<int>();
-    for (const auto idx : indices) {
-        values->push_back(p[idx]);
-    }
+    auto values = std::vector<int>();
+    for (const auto idx : indices) { values.push_back(p[idx]); }
 
-    std::shuffle(values->begin(), values->end(), gen);
+    std::shuffle(values.begin(), values.end(), gen);
 
     int j = 0;
     for (const auto index: indices) {
-        int val = values->at(j);
+        int val = values.at(j);
         auto tmp_it = std::find(q.begin(), q.end(), val);
         auto tmp_idx = std::distance(q.begin(), tmp_it);
         auto tmp = q[index];
-        q[index] = values->at(j);
+        q[index] = values.at(j);
         q[tmp_idx] = tmp;
         j++;
     }
 
-    delete values;
-
     return q;
 }
 
-
 float QuadraticAssignmentProblem::Objective(const std::vector<int> &p) const {
     float sum = 0.0;
-    int h = 1;
     for (int i = 0; i < n; ++i) {
-        for (int j = h; j < n; ++j) {
-            std::pair<int, int> facilities;
-            int count = 0;
-            for (int k = 0; k < n; ++k) {
-                if (k == i) {
-                    facilities.first = p[k];
-                    count++;
-                } else if (k == j) {
-                    facilities.second = p[k];
-                    count++;
-                }
-                if (count == 2) {
-                    break;
-                }
-            }
-            sum += weight_matrix(facilities.first, facilities.second) * distance_matrix(i, j);
+        for (int j = i+1; j < n; ++j) {
+            sum += weight_matrix(p[i], p[j]) * distance_matrix(i, j) * 2.0f;
         }
-        h++;
     }
     current_fitness = sum;
     return sum;
