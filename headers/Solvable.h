@@ -9,15 +9,13 @@
 template <typename T>
 class Solvable
 {
-protected:
-    ~Solvable() = default;
-
 public:
     virtual T GenerateElement() const = 0;
-    virtual T GenerateNeighbour(const T&, float eps) const = 0;
-    //virtual std::vector<T> AllNeighbours(const T&, const D&) = 0;
     virtual float Objective(const T&) const = 0;
-    [[nodiscard]] virtual bool StopSearch() const = 0;
+    [[nodiscard]] virtual bool StopCondition() const = 0;
+
+protected:
+    ~Solvable() = default;
 };
 
 

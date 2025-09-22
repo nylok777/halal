@@ -7,40 +7,39 @@
 #define HALAL_SIMULATEDANNEALINGSOLVER_H
 #include <random>
 #include <iostream>
-#include "Solvable.h"
+#include "StochasticSolvable.h"
 
 template <typename T>
 class SimulatedAnnealingSolver
 {
-    Solvable<T>* problem;
+    StochasticSolvable<T>* problem;
     float temp0;
 
 public:
-    SimulatedAnnealingSolver(Solvable<T>& problem, float temp0);
-    [[nodiscard]] float BoltzmannScheduleTemperature(int) const;
-    std::pair<T, float> SimulatedAnnealing(float eps, float kB);
+    SimulatedAnnealingSolver(StochasticSolvable<T>& problem, const float& temp0);
+    [[nodiscard]] float BoltzmannScheduleTemperature(const int) const;
+    std::pair<T, float> SimulatedAnnealing(const float& eps, const float& kB);
 };
 
 template <typename T>
-SimulatedAnnealingSolver<T>::SimulatedAnnealingSolver(Solvable<T>& problem, float temp0) {
-    this->problem = &problem;
-    this->temp0 = temp0;
+SimulatedAnnealingSolver<T>::SimulatedAnnealingSolver(StochasticSolvable<T>& problem, const float& temp0)
+    : problem(&problem), temp0(temp0) {
 }
 
 template <typename T>
-float SimulatedAnnealingSolver<T>::BoltzmannScheduleTemperature(int t) const {
+float SimulatedAnnealingSolver<T>::BoltzmannScheduleTemperature(const int t) const {
     return temp0 / std::log(t + 1);
 }
 
 template <typename T>
-std::pair<T, float> SimulatedAnnealingSolver<T>::SimulatedAnnealing(float eps, float kB) {
+std::pair<T, float> SimulatedAnnealingSolver<T>::SimulatedAnnealing(const float& eps, const float& kB) {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_real_distribution<> real_range;
     auto p = problem->GenerateElement();
     auto best_element = p;
     int t = 0;
-    while (!problem->StopSearch()) {
+    while (!problem->StopCondition()) {
         t++;
         const auto q = problem->GenerateNeighbour(p, eps);
         const float p_fitness = problem->Objective(p);
@@ -53,7 +52,7 @@ std::pair<T, float> SimulatedAnnealingSolver<T>::SimulatedAnnealing(float eps, f
             }
         }
         else {
-            const auto r = delta_e / kB * this->BoltzmannScheduleTemperature(t);
+            const auto r = delta_e / kB * BoltzmannScheduleTemperature(t);
             if (const auto x = exp(r); real_range(gen) < x) {
                 p = q;
             }

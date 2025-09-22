@@ -6,12 +6,18 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(.)
 
 add_executable(halal
-        HillClimb.h
+        headers/HillClimb.h
         QuadraticAssignmentProblem.cpp
-        QuadraticAssignmentProblem.h
+        headers/QuadraticAssignmentProblem.h
         main.cpp
-        SimulatedAnnealingSolver.h
-        Solvable.h
-        GeneticSolver.h
-        GeneticSolvable.h
+        headers/SimulatedAnnealingSolver.h
+        headers/Solvable.h
+        headers/GeneticAlgorithmSolver.h
+        headers/GeneticSolvable.h
+        headers/JobShopProblem.h
+        headers/Matrix.h
+        headers/DisjunctiveGraph.h
+        DisjunctiveGraph.cpp
+        JobShopProblem.cpp
+        headers/StochasticSolvable.h
 )

@@ -11,12 +11,12 @@
 #include "GeneticSolvable.h"
 
 template<typename T>
-class GeneticSolver
+class GeneticAlgorithmSolver
 {
     GeneticSolvable<T>* problem;
 
 public:
-    explicit GeneticSolver(GeneticSolvable<T>& problem);
+    explicit GeneticAlgorithmSolver(GeneticSolvable<T>& problem);
     std::vector<T> InitPopulation(const int&);
     std::vector<float> Evaluation(const std::vector<T>&);
     std::vector<T> Selection(const std::vector<T>&, const std::vector<float>&, const int&);
@@ -26,10 +26,10 @@ public:
 };
 
 template <typename T>
-GeneticSolver<T>::GeneticSolver(GeneticSolvable<T>& problem) : problem(&problem) {}
+GeneticAlgorithmSolver<T>::GeneticAlgorithmSolver(GeneticSolvable<T>& problem) : problem(&problem) {}
 
 template <typename T>
-std::vector<T> GeneticSolver<T>::InitPopulation(const int& size) {
+std::vector<T> GeneticAlgorithmSolver<T>::InitPopulation(const int& size) {
     auto population = std::vector<std::vector<int>>();
     for (int i = 0; i < size; ++i) {
         auto p = problem->GenerateElement();
@@ -39,7 +39,7 @@ std::vector<T> GeneticSolver<T>::InitPopulation(const int& size) {
 }
 
 template <typename T>
-std::vector<float> GeneticSolver<T>::Evaluation(const std::vector<T>& population) {
+std::vector<float> GeneticAlgorithmSolver<T>::Evaluation(const std::vector<T>& population) {
     auto fitness = std::vector<float>();
     for (auto p : population) {
         fitness.push_back(problem->Objective(p));
@@ -48,7 +48,7 @@ std::vector<float> GeneticSolver<T>::Evaluation(const std::vector<T>& population
 }
 
 template <typename T>
-std::vector<T> GeneticSolver<T>::Selection(const std::vector<T>& population, const std::vector<float>& fitness,
+std::vector<T> GeneticAlgorithmSolver<T>::Selection(const std::vector<T>& population, const std::vector<float>& fitness,
                                            const int& m) {
     auto p_fit_pairs = std::vector<std::pair<T, float>>();
     for (int i = 0; i < population.size(); ++i) {
@@ -65,7 +65,7 @@ std::vector<T> GeneticSolver<T>::Selection(const std::vector<T>& population, con
 }
 
 template <typename T>
-std::vector<T> GeneticSolver<T>::Reinsertion(std::vector<T>& old_gen, std::vector<T>& new_gen) {
+std::vector<T> GeneticAlgorithmSolver<T>::Reinsertion(std::vector<T>& old_gen, std::vector<T>& new_gen) {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> dist(0, 1);
@@ -88,7 +88,7 @@ std::vector<T> GeneticSolver<T>::Reinsertion(std::vector<T>& old_gen, std::vecto
 
 
 template <typename T>
-std::pair<T, float> GeneticSolver<T>::GeneticAlgorithm(const int& k, const int& population_size, const int& parents_size) {
+std::pair<T, float> GeneticAlgorithmSolver<T>::GeneticAlgorithm(const int& k, const int& population_size, const int& parents_size) {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> dist(0, parents_size - 1);
@@ -96,7 +96,7 @@ std::pair<T, float> GeneticSolver<T>::GeneticAlgorithm(const int& k, const int& 
     auto population = InitPopulation(population_size);
     auto pop_fitness = Evaluation(population);
     auto p_best = problem->GetBest(population, pop_fitness);
-    while (!problem->StopSearch()) {
+    while (!problem->StopCondition()) {
         auto parents = Selection(population, pop_fitness, parents_size);
         auto new_gen = std::vector<T>();
         while (new_gen.size() < parents.size()) {

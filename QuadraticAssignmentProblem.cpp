@@ -2,24 +2,20 @@
 // Created by david on 9/17/25.
 //
 
-#include "QuadraticAssignmentProblem.h"
+#include "headers/QuadraticAssignmentProblem.h"
 #include <random>
 #include <unordered_set>
 #include <algorithm>
 #include <fstream>
 
-QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n) : weight_matrix(n), distance_matrix(n) {
-    this->n = n;
-    this->max_drought = 5;
-    this->drought_radius = 100;
+QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n, const int max_drought, const float drought_radius)
+    : n(n), max_drought(max_drought), drought_radius(drought_radius), weight_matrix(n), distance_matrix(n) {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_real_distribution<float> weight_dist(0.1, 10.0);
     std::uniform_real_distribution<float> dist_dist(5.0, 40.0);
 
     int k = 1;
-    this->weight_matrix = symmetric_matrix<float>(n);
-    this->distance_matrix = symmetric_matrix<float>(n);
     for (int i = 0; i < n; ++i) {
         weight_matrix(i, i) = 0;
         distance_matrix(i, i) = 0;
@@ -31,9 +27,8 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n) : weight_mat
     }
 }
 
-QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, int max_drought, float drought_radius) {
-    this->max_drought = max_drought;
-    this->drought_radius = drought_radius;
+QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, int max_drought, float drought_radius)
+    : max_drought(max_drought), drought_radius(drought_radius) {
     std::ifstream in(filename);
     if (!in) {
         throw std::runtime_error("Could not open file: " + filename);
@@ -80,7 +75,7 @@ std::vector<int> QuadraticAssignmentProblem::GenerateElement() const {
     return bijection;
 }
 
-std::vector<int> QuadraticAssignmentProblem::GenerateNeighbour(const std::vector<int>& p, float eps) const {
+std::vector<int> QuadraticAssignmentProblem::GenerateNeighbour(const std::vector<int>& p, const float eps) const {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> dist(0, n - 1);
@@ -135,7 +130,7 @@ float QuadraticAssignmentProblem::Objective(const std::vector<int>& p) const {
     return sum;
 }
 
-bool QuadraticAssignmentProblem::StopSearch() const {
+bool QuadraticAssignmentProblem::StopCondition() const {
     if (fabsf(current_fitness - last_fitness) < drought_radius) {
         drought_count++;
     }

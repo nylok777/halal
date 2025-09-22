@@ -10,16 +10,14 @@
 #include "Solvable.h"
 
 template <typename T>
-class GeneticSolvable : public Solvable<T>
+class GeneticSolvable : public virtual Solvable<T>
 {
-    //friend GeneticSolver<T>;
-protected:
-    ~GeneticSolvable() = default;
-
 public:
     virtual T CrossOver(const std::vector<T>&) = 0;
     virtual T Mutate(T&) = 0;
     virtual std::pair<T, float> GetBest(const std::vector<T>&, const std::vector<float>&) = 0;
+protected:
+    ~GeneticSolvable() = default;
 };
 
 #endif //HALAL_GENETICSOLVABLE_H
