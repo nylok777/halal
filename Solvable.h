@@ -6,8 +6,9 @@
 #ifndef HALAL_SOLVABLE_H
 #define HALAL_SOLVABLE_H
 
-template<typename T>
-class Solvable {
+template <typename T>
+class Solvable
+{
 protected:
     ~Solvable() = default;
 

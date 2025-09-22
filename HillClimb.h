@@ -8,9 +8,9 @@
 #include <functional>
 #include <iostream>
 
-template<typename T, typename D>
+template <typename T, typename D>
 T StochasticHillClimb(D eps, std::function<T()> generate, std::function<T(T, D)> random_neighbour,
-    std::function<float(T)> fitness, const std::function<bool()>& stop_condition) {
+                      std::function<float(T)> fitness, const std::function<bool()>& stop_condition) {
     auto p = generate();
     while (!stop_condition()) {
         auto q = random_neighbour(p, eps);
@@ -23,16 +23,17 @@ T StochasticHillClimb(D eps, std::function<T()> generate, std::function<T(T, D)>
     return p;
 }
 
-template<typename T, typename D>
+template <typename T, typename D>
 T SteepestAscentHillClimb(D eps, std::function<T()> generate, std::function<T(T, D)> best_neighbour,
-    std::function<float(T)> fitness, const std::function<bool()>& stop_condition) {
+                          std::function<float(T)> fitness, const std::function<bool()>& stop_condition) {
     auto p = generate();
     bool stuck = false;
     while (!stuck && !stop_condition()) {
         auto q = best_neighbour(p, eps);
         if (fitness(q) < fitness(p)) {
             p = q;
-        } else {
+        }
+        else {
             stuck = true;
         }
     }

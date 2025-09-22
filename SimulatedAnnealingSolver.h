@@ -6,13 +6,15 @@
 #ifndef HALAL_SIMULATEDANNEALINGSOLVER_H
 #define HALAL_SIMULATEDANNEALINGSOLVER_H
 #include <random>
-
+#include <iostream>
 #include "Solvable.h"
 
-template<typename T>
-class SimulatedAnnealingSolver {
+template <typename T>
+class SimulatedAnnealingSolver
+{
     Solvable<T>* problem;
     float temp0;
+
 public:
     SimulatedAnnealingSolver(Solvable<T>& problem, float temp0);
     [[nodiscard]] float BoltzmannScheduleTemperature(int) const;
@@ -20,19 +22,17 @@ public:
 };
 
 template <typename T>
-SimulatedAnnealingSolver<T>::SimulatedAnnealingSolver(Solvable<T>& problem, float temp0)
-{
+SimulatedAnnealingSolver<T>::SimulatedAnnealingSolver(Solvable<T>& problem, float temp0) {
     this->problem = &problem;
     this->temp0 = temp0;
 }
 
 template <typename T>
-float SimulatedAnnealingSolver<T>::BoltzmannScheduleTemperature(int t) const
-{
+float SimulatedAnnealingSolver<T>::BoltzmannScheduleTemperature(int t) const {
     return temp0 / std::log(t + 1);
 }
 
-template<typename T>
+template <typename T>
 std::pair<T, float> SimulatedAnnealingSolver<T>::SimulatedAnnealing(float eps, float kB) {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
@@ -51,7 +51,8 @@ std::pair<T, float> SimulatedAnnealingSolver<T>::SimulatedAnnealing(float eps, f
             if (q_fitness < problem->Objective(best_element)) {
                 best_element = q;
             }
-        } else {
+        }
+        else {
             const auto r = delta_e / kB * this->BoltzmannScheduleTemperature(t);
             if (const auto x = exp(r); real_range(gen) < x) {
                 p = q;

@@ -8,10 +8,11 @@
 #include <cmath>
 #include <string>
 #include <vector>
-#include "Solvable.h"
+#include "GeneticSolvable.h"
 
-template<typename T>
-struct symmetric_matrix {
+template <typename T>
+struct symmetric_matrix
+{
 private:
     int n;
     std::vector<T> data;
@@ -20,18 +21,20 @@ private:
         if (i < j) std::swap(i, j);
         return i * (i + 1) / 2 + j;
     }
+
 public:
     explicit symmetric_matrix(int size) : n(size), data(size * (size + 1) / 2) {}
+
     T& operator()(const int i, const int j) {
         return data[index(i, j)];
     }
+
     const T& operator()(const int i, const int j) const {
         return data[index(i, j)];
     }
-
 };
 
-class QuadraticAssignmentProblem final : public Solvable<std::vector<int>>
+class QuadraticAssignmentProblem final : public GeneticSolvable<std::vector<int>>
 {
     int n = 0;
     mutable float last_fitness = std::numeric_limits<float>::max();
@@ -53,7 +56,9 @@ public:
 
     float Objective(const std::vector<int>&) const override;
     bool StopSearch() const override;
-
+    std::vector<int> CrossOver(const std::vector<std::vector<int>>&) override;
+    std::vector<int> Mutate(std::vector<int>&) override;
+    std::pair<std::vector<int>, float> GetBest(const std::vector<std::vector<int>>&, const std::vector<float>&) override;
 };
 
 

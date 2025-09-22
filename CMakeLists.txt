@@ -13,6 +13,5 @@ add_executable(halal
         SimulatedAnnealingSolver.h
         Solvable.h
         GeneticSolver.h
-        GeneticSolver.cpp
         GeneticSolvable.h
 )
