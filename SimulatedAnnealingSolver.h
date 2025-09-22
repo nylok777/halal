@@ -5,19 +5,60 @@
 
 #ifndef HALAL_SIMULATEDANNEALINGSOLVER_H
 #define HALAL_SIMULATEDANNEALINGSOLVER_H
-#include <iostream>
 #include <random>
+
 #include "Solvable.h"
 
 template<typename T>
 class SimulatedAnnealingSolver {
-
-    Solvable<T> problem;
+    Solvable<T>* problem;
     float temp0;
 public:
     SimulatedAnnealingSolver(Solvable<T>& problem, float temp0);
-    float BoltzmannScheduleTemperature(int) const;
+    [[nodiscard]] float BoltzmannScheduleTemperature(int) const;
     std::pair<T, float> SimulatedAnnealing(float eps, float kB);
 };
 
+template <typename T>
+SimulatedAnnealingSolver<T>::SimulatedAnnealingSolver(Solvable<T>& problem, float temp0)
+{
+    this->problem = &problem;
+    this->temp0 = temp0;
+}
+
+template <typename T>
+float SimulatedAnnealingSolver<T>::BoltzmannScheduleTemperature(int t) const
+{
+    return temp0 / std::log(t + 1);
+}
+
+template<typename T>
+std::pair<T, float> SimulatedAnnealingSolver<T>::SimulatedAnnealing(float eps, float kB) {
+    std::random_device rnd;
+    std::mt19937 gen{rnd()};
+    std::uniform_real_distribution<> real_range;
+    auto p = problem->GenerateElement();
+    auto best_element = p;
+    int t = 0;
+    while (!problem->StopSearch()) {
+        t++;
+        const auto q = problem->GenerateNeighbour(p, eps);
+        const float p_fitness = problem->Objective(p);
+        const float q_fitness = problem->Objective(q);
+        std::cout << "p: " << p_fitness << std::endl;
+        if (const auto delta_e = q_fitness - p_fitness; delta_e <= 0) {
+            p = q;
+            if (q_fitness < problem->Objective(best_element)) {
+                best_element = q;
+            }
+        } else {
+            const auto r = delta_e / kB * this->BoltzmannScheduleTemperature(t);
+            if (const auto x = exp(r); real_range(gen) < x) {
+                p = q;
+            }
+        }
+    }
+    auto best_fitness = problem->Objective(best_element);
+    return std::pair(best_element, best_fitness);
+}
 #endif //HALAL_SIMULATEDANNEALINGSOLVER_H

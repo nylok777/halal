@@ -31,8 +31,7 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n) : weight_mat
     }
 }
 
-QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, int max_drought,
-    float drought_radius) {
+QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, int max_drought, float drought_radius) {
     this->max_drought = max_drought;
     this->drought_radius = drought_radius;
     std::ifstream in(filename);

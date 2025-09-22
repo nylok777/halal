@@ -3,13 +3,12 @@
 //
 #pragma once
 
-#ifndef HALAL_QUADRATICASSIGNMENT_H
-#define HALAL_QUADRATICASSIGNMENT_H
+#ifndef HALAL_QUADRATICASSIGNMENTPROBLEM_H
+#define HALAL_QUADRATICASSIGNMENTPROBLEM_H
 #include <cmath>
+#include <string>
 #include <vector>
-
-#include "GeneticSolver.h"
-#include "SimulatedAnnealingSolver.h"
+#include "Solvable.h"
 
 template<typename T>
 struct symmetric_matrix {
@@ -32,9 +31,9 @@ public:
 
 };
 
-class QuadraticAssignmentProblem: public GeneticSolvable<std::vector<int>>
+class QuadraticAssignmentProblem final : public Solvable<std::vector<int>>
 {
-    int n;
+    int n = 0;
     mutable float last_fitness = std::numeric_limits<float>::max();
     mutable float current_fitness = 0.0;
     int max_drought;
@@ -58,4 +57,4 @@ public:
 };
 
 
-#endif //HALAL_QUADRATICASSIGNMENT_H
+#endif //HALAL_QUADRATICASSIGNMENTPROBLEM_H
