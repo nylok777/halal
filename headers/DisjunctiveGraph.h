@@ -5,20 +5,36 @@
 #ifndef HALAL_DISJUNCTIVEGRAPH_H
 #define HALAL_DISJUNCTIVEGRAPH_H
 #include <set>
-#include <unordered_set>
 #include <vector>
 
-struct vertice
+struct vertex;
+
+struct u_edge
+{
+    const vertex* v1;
+    const vertex* v2;
+};
+
+struct d_edge
+{
+    const vertex* from;
+    const vertex* to;
+};
+
+struct vertex
 {
     int id;
-    std::set<vertice*> directed_cons;
-    std::set<vertice*> undirected_cons;
-    vertice(const int id, std::set<vertice*>& d_cons, std::set<vertice*>& u_cons);
+    std::set<const vertex*> u_neighbours;
+    std::set<const vertex*> d_neighbours;
+    friend bool operator<(const vertex& item1, const vertex& item2) {
+        return item1.id < item2.id;
+    }
 };
 struct disjunctive_graph
 {
-    int n;
-    std::set<vertice> vertices;
-    explicit disjunctive_graph(std::set<vertice>& vertices);
+    explicit disjunctive_graph(std::set<vertex>& vertices, std::vector<u_edge>& u_edges, std::vector<d_edge>& d_edges);
+    std::set<vertex> vertices;
+    std::vector<u_edge> u_edges;
+    std::vector<d_edge> d_edges;
 };
 #endif //HALAL_DISJUNCTIVEGRAPH_H

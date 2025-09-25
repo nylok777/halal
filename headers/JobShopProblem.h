@@ -11,15 +11,30 @@
 #include "Matrix.h"
 #include "Solvable.h"
 
-class JobShopProblem : public Solvable<matrix<int>>
+struct operation
+{
+    int precedence = 0;
+    int job_id = 0;
+    int machine_id = 0;
+    float time = 0.0;
+    friend bool operator<(const operation& op1, const operation& op2) {
+        if (op1.precedence != op2.precedence) {
+            return op1.precedence < op2.precedence;
+        }
+        return op1.job_id < op2.job_id;
+    }
+};
+
+class JobShopProblem : public Solvable<matrix<operation>>
 {
 public:
     virtual ~JobShopProblem() = default;
-    explicit JobShopProblem(disjunctive_graph  job_graph);
-    float Objective(const matrix<int>&) const override;
-    matrix<int> GenerateElement() const override;
+    float Objective(const matrix<operation>&) const override;
+    [[nodiscard]] matrix<operation> GenerateElement() const override;
     bool StopCondition() const override;
 private:
-    disjunctive_graph graph;
+    std::vector<operation> operations;
+    int machines_num;
+    int jobs_num;
 };
 #endif //HALAL_JOBSHOPPROBLEM_H

@@ -15,8 +15,8 @@ private:
     int m;
     std::vector<std::vector<T>> data;
 public:
-    matrix(const int n, const int m) : n(n), m(m), data(std::vector<T>(m), n) {}
-
+ //   matrix(const int n, const int m) : n(n), m(m), data(std::vector<T>(m), n) {}
+    matrix(const int n, const int m, std::vector<std::vector<T>> matrix) : n(n), m(m), data(matrix) {}
     T& operator()(const int i, const int j) {
         return data[i][j];
     }

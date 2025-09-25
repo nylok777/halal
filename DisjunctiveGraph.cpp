@@ -3,13 +3,5 @@
 //
 #include "headers/DisjunctiveGraph.h"
 
-vertice::vertice(const int id, std::set<vertice*>& d_cons, std::set<vertice*>& u_cons)
-    : id(id), directed_cons(std::move(d_cons)), undirected_cons(std::move(u_cons)) {
-}
-
-disjunctive_graph::disjunctive_graph(std::set<vertice>& vertices)
-    : n(vertices.size()), vertices(std::move(vertices)) {
-}
-
-
-
+disjunctive_graph::disjunctive_graph(std::set<vertex>& vertices, std::vector<u_edge>& u_edges, std::vector<d_edge>& d_edges)
+    : vertices(std::move(vertices)), u_edges(std::move(u_edges)), d_edges(std::move(d_edges)) {}
