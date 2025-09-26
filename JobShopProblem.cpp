@@ -8,6 +8,10 @@
 #include <random>
 #include <algorithm>
 
+JobShopProblem::JobShopProblem(const int machines_num, const int jobs_num, std::vector<operation>& ops)
+    : operations(std::move(ops)), machines_num(machines_num), jobs_num(jobs_num) {}
+
+
 matrix<operation> JobShopProblem::GenerateElement() const {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
@@ -41,3 +45,28 @@ matrix<operation> JobShopProblem::GenerateElement() const {
     }
     return schedule;
 }
+
+float JobShopProblem::Objective(const matrix<operation>& schedule) const {
+    auto proc_times = std::vector(machines_num, 0.0f);
+    for (int i = 0; i < machines_num; ++i) {
+        for (const auto& row : schedule.row(i)) {
+            proc_times[i] += row.time;
+        }
+    }
+
+    const auto max = std::max_element(proc_times.begin(), proc_times.end());
+
+    return *max.base();
+}
+
+bool JobShopProblem::StopCondition() const {
+    if (fabsf(current_makespan - last_makespan) < drought_radius) {
+        drought_count++;
+    }
+    else {
+        drought_count = 0;
+    }
+    last_makespan = current_makespan;
+    return drought_count >= max_drought;
+}
+

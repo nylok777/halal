@@ -50,6 +50,10 @@ public:
         }
         return c;
     }
+
+    int row_num() const {
+        return n;
+    }
 };
 
 template <typename T>
