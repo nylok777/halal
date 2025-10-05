@@ -7,33 +7,53 @@
 #define HALAL_MATRIX_H
 #include <vector>
 
-template<typename T>
+template <typename T>
 struct matrix
 {
 private:
     int n;
     int m;
     std::vector<std::vector<T>> data;
+
 public:
- //   matrix(const int n, const int m) : n(n), m(m), data(std::vector<T>(m), n) {}
-    matrix(const int n, const int m, std::vector<std::vector<T>> matrix) : n(n), m(m), data(matrix) {}
-    T& operator()(const int i, const int j) {
+    matrix() = default;
+
+    matrix(const int n, const int m) : n(n), m(m), data(std::vector(n, std::vector<T>(m, T()))) {}
+
+    T& operator()(const int i, const int j)
+    {
         return data[i][j];
     }
 
-    const T& operator()(const int i, const int j) const {
+
+    const T& operator()(const int i, const int j) const
+    {
         return data[i][j];
     }
 
-    std::vector<T>& row(const int i) {
+    std::vector<T> to_vector() const
+    {
+        auto flat = std::vector<T>(n * m);
+        auto from = 0;
+        for (int i = 0; i < n; ++i) {
+            flat.insert(data[i].cbegin() + from, data[i].cbegin(), data[i].cend());
+            from += data[i].size();
+        }
+        return flat;
+    }
+
+    std::vector<T>& row(const int i)
+    {
         return data[i];
     }
 
-    const std::vector<T>& row(const int i) const {
+    const std::vector<T>& row(const int i) const
+    {
         return data[i];
     }
 
-    std::vector<T&> column(const int j) {
+    std::vector<T&> column(const int j)
+    {
         auto c = std::vector<T&>();
         c.capacity(n);
         for (auto r : data) {
@@ -42,7 +62,8 @@ public:
         return c;
     }
 
-    std::vector<const T&> column(const int j) const {
+    std::vector<const T&> column(const int j) const
+    {
         auto c = std::vector<const T&>();
         c.capacity(n);
         for (auto r : data) {
@@ -51,8 +72,19 @@ public:
         return c;
     }
 
-    int row_num() const {
+    int row_num() const
+    {
         return n;
+    }
+
+    int column_num() const
+    {
+        return m;
+    }
+
+    int size() const
+    {
+        return n * m;
     }
 };
 
@@ -63,7 +95,8 @@ private:
     int n;
     std::vector<T> data;
 
-    static int index(int i, int j) {
+    static int index(int i, int j)
+    {
         if (i < j) std::swap(i, j);
         return i * (i + 1) / 2 + j;
     }
@@ -71,11 +104,13 @@ private:
 public:
     explicit symmetric_matrix(const int size) : n(size), data(size * (size + 1) / 2) {}
 
-    T& operator()(const int i, const int j) {
+    T& operator()(const int i, const int j)
+    {
         return data[index(i, j)];
     }
 
-    const T& operator()(const int i, const int j) const {
+    const T& operator()(const int i, const int j) const
+    {
         return data[index(i, j)];
     }
 };

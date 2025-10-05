@@ -15,6 +15,7 @@
 
 struct operation
 {
+    operation() = default;
     int precedence = 0;
     int job_id = 0;
     int machine_id = 0;
