@@ -8,26 +8,23 @@
 #include <cmath>
 #include <string>
 #include <vector>
-#include "GeneticSolvable.h"
 #include "Matrix.h"
-#include "StochasticSolvable.h"
+#include "Problem.h"
 
-class QuadraticAssignmentProblem final : public GeneticSolvable<std::vector<int>>, public StochasticSolvable<std::vector<int>>
+class QuadraticAssignmentProblem final
+    : public Problem<std::vector<int>>
 {
 public:
-    ~QuadraticAssignmentProblem() override = default;
-
     QuadraticAssignmentProblem(const int n, const int max_drought, const float drought_radius);
     QuadraticAssignmentProblem(std::string& filename, int max_drought, float drought_radius);
 
     std::vector<int> GenerateElement() const override;
-    std::vector<int> GenerateNeighbour(const std::vector<int>&, float) const override;
 
     float Objective(const std::vector<int>&) const override;
     bool StopCondition() const override;
-    std::vector<int> CrossOver(const std::vector<std::vector<int>>&) override;
-    std::vector<int> Mutate(std::vector<int>&) override;
-    std::pair<std::vector<int>, float> GetBest(const std::vector<std::vector<int>>&, const std::vector<float>&) override;
+    void SetCurrentFitness(float fitness) const;
+
+    int ProblemSize() const;
 
 private:
     int n = 0;

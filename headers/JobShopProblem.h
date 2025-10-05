@@ -11,7 +11,7 @@
 #include "DisjunctiveGraph.h"
 #include "GeneticSolvable.h"
 #include "Matrix.h"
-#include "Solvable.h"
+#include "Problem.h"
 
 struct operation
 {
@@ -28,7 +28,7 @@ struct operation
     }
 };
 
-class JobShopProblem : public GeneticSolvable<matrix<operation>>
+class JobShopProblem : public Problem<matrix<operation>>
 {
 public:
     virtual ~JobShopProblem() = default;
@@ -36,9 +36,8 @@ public:
     [[nodiscard]] float Objective(const matrix<operation>&) const override;
     [[nodiscard]] matrix<operation> GenerateElement() const override;
     bool StopCondition() const override;
-    std::pair<matrix<operation>, float> GetBest(const std::vector<matrix<operation>>&, const std::vector<float>&) override;
-    matrix<operation> Mutate(matrix<operation>&) override;
-    matrix<operation> CrossOver(const std::vector<matrix<operation>>&) override;
+    void SetMakespan(const float makespan) const;
+    int GetMachinesNumber() const;
 private:
     std::vector<operation> operations;
     int machines_num;

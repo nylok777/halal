@@ -12,7 +12,7 @@
 template <typename T>
 class SimulatedAnnealingSolver
 {
-    StochasticSolvable<T>* problem;
+    StochasticSolvable<T>* solvable;
     float temp0;
 
 public:
@@ -23,7 +23,7 @@ public:
 
 template <typename T>
 SimulatedAnnealingSolver<T>::SimulatedAnnealingSolver(StochasticSolvable<T>& problem, const float& temp0)
-    : problem(&problem), temp0(temp0) {
+    : solvable(&problem), temp0(temp0) {
 }
 
 template <typename T>
@@ -36,18 +36,18 @@ std::pair<T, float> SimulatedAnnealingSolver<T>::SimulatedAnnealing(const float&
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_real_distribution<> real_range;
-    auto p = problem->GenerateElement();
+    auto p = solvable->GetProblem().GenerateElement();
     auto best_element = p;
     int t = 0;
-    while (!problem->StopCondition()) {
+    while (!solvable->GetProblem().StopCondition()) {
         t++;
-        const auto q = problem->GenerateNeighbour(p, eps);
-        const float p_fitness = problem->Objective(p);
-        const float q_fitness = problem->Objective(q);
+        const auto q = solvable->GenerateNeighbour(p, eps);
+        const float p_fitness = solvable->GetProblem().Objective(p);
+        const float q_fitness = solvable->GetProblem().Objective(q);
         std::cout << "p: " << p_fitness << std::endl;
         if (const auto delta_e = q_fitness - p_fitness; delta_e <= 0) {
             p = q;
-            if (q_fitness < problem->Objective(best_element)) {
+            if (q_fitness < solvable->GetProblem().Objective(best_element)) {
                 best_element = q;
             }
         }
@@ -58,7 +58,7 @@ std::pair<T, float> SimulatedAnnealingSolver<T>::SimulatedAnnealing(const float&
             }
         }
     }
-    auto best_fitness = problem->Objective(best_element);
+    auto best_fitness = solvable->GetProblem().Objective(best_element);
     return std::pair(best_element, best_fitness);
 }
 #endif //HALAL_SIMULATEDANNEALINGSOLVER_H

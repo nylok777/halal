@@ -7,7 +7,7 @@
 #define HALAL_SOLVABLE_H
 
 template <typename T>
-class Solvable
+class Problem
 {
 public:
     virtual T GenerateElement() const = 0;
@@ -15,7 +15,7 @@ public:
     [[nodiscard]] virtual bool StopCondition() const = 0;
 
 protected:
-    ~Solvable() = default;
+    ~Problem() = default;
 };
 
 

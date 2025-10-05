@@ -11,7 +11,7 @@ add_executable(halal
         headers/QuadraticAssignmentProblem.h
         main.cpp
         headers/SimulatedAnnealingSolver.h
-        headers/Solvable.h
+        headers/Problem.h
         headers/GeneticAlgorithmSolver.h
         headers/GeneticSolvable.h
         headers/JobShopProblem.h
@@ -20,4 +20,10 @@ add_executable(halal
         DisjunctiveGraph.cpp
         JobShopProblem.cpp
         headers/StochasticSolvable.h
+        headers/GeneticQuadraticAssignment.h
+        GeneticQuadraticAssignment.cpp
+        StochasticQuadraticAssignment.h
+        StochasticQuadraticAssignment.cpp
+        headers/GeneticJobShop.h
+        GeneticJobShop.cpp
 )

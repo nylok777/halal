@@ -7,15 +7,16 @@
 #define HALAL_GENETICSOLVABLE_H
 #include <vector>
 
-#include "Solvable.h"
+#include "Problem.h"
 
 template <typename T>
-class GeneticSolvable : public virtual Solvable<T>
+class GeneticSolvable
 {
 public:
     virtual T CrossOver(const std::vector<T>&) = 0;
     virtual T Mutate(T&) = 0;
     virtual std::pair<T, float> GetBest(const std::vector<T>&, const std::vector<float>&) = 0;
+    virtual Problem<T>& GetProblem() = 0;
 protected:
     ~GeneticSolvable() = default;
 };
