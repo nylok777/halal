@@ -186,8 +186,13 @@ matrix<operation> JobShopProblem::CrossOver(
   return child;
 }
 
-std::pair<matrix<operation>, float> JobShopProblem::GetBest(const std::vector<matrix<operation>>&,
-                                                            const std::vector<float>&)
+std::pair<matrix<operation>, float> JobShopProblem::GetBest(const std::vector<matrix<operation>>& schedules,
+                                                            const std::vector<float>& fitness)
 {
-  throw "nincs kesz de azer megkene nezni buildel e";
+  auto best = 0;
+  for (int i = 1; i < fitness.size(); ++i) {
+    if (fitness[i] < fitness[best]) best = i;
+  }
+  current_makespan = fitness[best];
+  return std::make_pair(schedules[best], fitness[best]);
 }
