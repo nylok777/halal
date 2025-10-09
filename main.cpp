@@ -11,7 +11,7 @@ int main() {
     auto problem = QuadraticAssignmentProblem(file, 10, 100);
     auto solvable = GeneticQuadraticAssignment(problem);
     auto solver = GeneticAlgorithmSolver(solvable);
-    const auto res = solver.GeneticAlgorithm(2, 40, 10);
+    const auto res = solver.GeneticAlgorithm(10, 300, 100);
     std::cout << res.second << std::endl;
 
 };

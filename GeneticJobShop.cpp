@@ -89,6 +89,7 @@ bool CheckRowCompatibility(const std::vector<operation>& row, const std::vector<
     {
       return operation.job_id == op2.job_id && operation.precedence != op2.precedence;
     });
+    if (other_operation == other_row.cend()) continue;
     const auto operation_position = std::distance(row.cbegin(), operation_iter);
     const auto other_position = std::distance(other_row.cbegin(), other_operation);
     if (!((operation_position < other_position && operation.precedence < other_operation.base()->precedence) ||
@@ -114,7 +115,10 @@ matrix<operation> GeneticJobShop::CrossOver(
     auto count = 0;
     while (!row_valid && count < rows) {
       parent = parents[random_parent(gen)];
-      row_valid = CheckRowCompatibility(child.row(i - 1), parent.row(i));
+      for (int j = 0; j < i; ++j) {
+        row_valid = CheckRowCompatibility(child.row(j), parent.row(i));
+        if (!row_valid) break;
+      }
       count++;
     }
     if (count >= rows && i > 2) i--;
