@@ -5,31 +5,27 @@
 
 #ifndef HALAL_MATRIX_H
 #define HALAL_MATRIX_H
+#include <iostream>
 #include <vector>
 
+template<typename T>
+class Matrix;
+
 template <typename T>
-struct matrix
+std::ostream& operator<<(std::ostream& stream, const Matrix<T>& matrix);
+
+template <typename T>
+class Matrix
 {
-private:
-    int n;
-    int m;
-    std::vector<std::vector<T>> data;
 
 public:
-    matrix() = default;
+    Matrix() = default;
 
-    matrix(const int n, const int m) : n(n), m(m), data(std::vector(n, std::vector<T>(m, T()))) {}
+    Matrix(const int n, const int m) : n(n), m(m), data(std::vector(n, std::vector<T>(m, T()))) {}
 
-    T& operator()(const int i, const int j)
-    {
-        return data[i][j];
-    }
+    T& operator()(const int i, const int j) {return data[i][j];}
 
-
-    const T& operator()(const int i, const int j) const
-    {
-        return data[i][j];
-    }
+    const T& operator()(const int i, const int j) const {return data[i][j];}
 
     std::vector<T> to_vector() const
     {
@@ -42,15 +38,9 @@ public:
         return flat;
     }
 
-    std::vector<T>& row(const int i)
-    {
-        return data[i];
-    }
+    std::vector<T>& row(const int i) {return data[i];}
 
-    const std::vector<T>& row(const int i) const
-    {
-        return data[i];
-    }
+    const std::vector<T>& row(const int i) const {return data[i];}
 
     std::vector<T&> column(const int j)
     {
@@ -72,22 +62,31 @@ public:
         return c;
     }
 
-    int row_num() const
-    {
-        return n;
-    }
+    int row_num() const {return n;}
 
-    int column_num() const
-    {
-        return m;
-    }
+    int column_num() const {return m;}
 
-    int size() const
-    {
-        return n * m;
-    }
+    int size() const {return n * m;}
+
+    friend std::ostream& operator<<<T>(std::ostream& stream, const Matrix<T>& matrix);
+private:
+    int n;
+    int m;
+    std::vector<std::vector<T>> data;
 };
 
+template <typename T>
+std::ostream& operator<<(std::ostream& stream, const Matrix<T>& matrix)
+{
+    for (int i = 0; i < matrix.row_num(); ++i) {
+        const auto& row = matrix.row(i);
+        for (const auto & item : row) {
+            stream << item << ' ';
+        }
+        stream << '\n';
+    }
+    return stream;
+}
 template <typename T>
 struct symmetric_matrix
 {

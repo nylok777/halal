@@ -27,3 +27,10 @@ add_executable(halal
         headers/GeneticJobShop.h
         GeneticJobShop.cpp
 )
+add_executable(test_target tests/tests.cpp
+        tests/main.cpp
+        tests/tests.h
+        headers/JobShopProblem.h
+        headers/Matrix.h
+        JobShopProblem.cpp
+)

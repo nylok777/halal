@@ -9,14 +9,13 @@
 #include "JobShopProblem.h"
 #include "Matrix.h"
 
-class GeneticJobShop : GeneticSolvable<matrix<operation>>
+class GeneticJobShop : public virtual GeneticSolvable<Matrix<operation>>
 {
 public:
-    virtual ~GeneticJobShop() = default;
     explicit GeneticJobShop(const JobShopProblem& job_shop_problem);
-    std::pair<matrix<operation>, float> GetBest(const std::vector<matrix<operation>>&, const std::vector<float>&) override;
-    matrix<operation> Mutate(matrix<operation>&) override;
-    matrix<operation> CrossOver(const std::vector<matrix<operation>>&) override;
+    std::pair<Matrix<operation>, float> GetBest(const std::vector<Matrix<operation>>&, const std::vector<float>&) override;
+    Matrix<operation> Mutate(Matrix<operation>&) override;
+    Matrix<operation> CrossOver(const std::vector<Matrix<operation>>&) override;
     JobShopProblem& GetProblem() override;
 private:
     JobShopProblem job_shop_problem;

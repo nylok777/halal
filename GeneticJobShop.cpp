@@ -4,6 +4,7 @@
 #include "headers/GeneticJobShop.h"
 
 #include <algorithm>
+#include <map>
 #include <random>
 
 GeneticJobShop::GeneticJobShop(const JobShopProblem& job_shop_problem) : job_shop_problem(job_shop_problem)
@@ -14,7 +15,7 @@ GeneticJobShop::GeneticJobShop(const JobShopProblem& job_shop_problem) : job_sho
 
 std::pair<ptrdiff_t, ptrdiff_t> CheckSwitchValidity(const int m_id,
                                                     const int m_num,
-                                                    matrix<operation>& schedule,
+                                                    Matrix<operation>& schedule,
                                                     operation& op)
 {
   ptrdiff_t prev_pos = -1;
@@ -49,7 +50,7 @@ std::pair<ptrdiff_t, ptrdiff_t> CheckSwitchValidity(const int m_id,
   return std::make_pair(prev_pos, next_pos);
 }
 
-matrix<operation> GeneticJobShop::Mutate(matrix<operation>& schedule)
+Matrix<operation> GeneticJobShop::Mutate(Matrix<operation>& schedule)
 {
   std::random_device rnd;
   std::mt19937 gen{rnd()};
@@ -90,8 +91,10 @@ bool CheckRowCompatibility(const std::vector<operation>& row, const std::vector<
       return operation.job_id == op2.job_id && operation.precedence != op2.precedence;
     });
     if (other_operation == other_row.cend()) continue;
+
     const auto operation_position = std::distance(row.cbegin(), operation_iter);
     const auto other_position = std::distance(other_row.cbegin(), other_operation);
+
     if (!((operation_position < other_position && operation.precedence < other_operation.base()->precedence) ||
       (operation_position > other_position && operation.precedence > other_operation.base()->precedence)))
       return false;
@@ -99,22 +102,27 @@ bool CheckRowCompatibility(const std::vector<operation>& row, const std::vector<
   return true;
 }
 
-matrix<operation> GeneticJobShop::CrossOver(
-  const std::vector<matrix<operation>>& parents)
+Matrix<operation> GeneticJobShop::CrossOver(
+  const std::vector<Matrix<operation>>& parents)
 {
   std::random_device rnd;
   std::mt19937 gen{rnd()};
   std::uniform_int_distribution random_parent(0, static_cast<int>(parents.size()));
-
-  auto child = matrix<operation>(parents[0].row_num(), parents[0].column_num());
+  std::set<std::pair<int, int>> used_rows; // ith matrix jth row
+  auto child = Matrix<operation>(parents[0].row_num(), parents[0].column_num());
   child.row(0) = parents[random_parent(gen)].row(0);
   const auto rows = parents[0].row_num();
   for (int i = 1; i < rows; ++i) {
     auto row_valid = false;
     decltype(child) parent;
-    auto count = 0;
+    int n_parent;
+    int count = 0;
     while (!row_valid && count < rows) {
-      parent = parents[random_parent(gen)];
+      n_parent = random_parent(gen);
+      if (used_rows.find(std::pair(n_parent, i)) != used_rows.end()) {
+        continue;
+      }
+      parent = parents.at(n_parent);
       for (int j = 0; j < i; ++j) {
         row_valid = CheckRowCompatibility(child.row(j), parent.row(i));
         if (!row_valid) break;
@@ -126,13 +134,16 @@ matrix<operation> GeneticJobShop::CrossOver(
       child.row(0) = parents[random_parent(gen)].row(0);
       i = 1;
     }
-    else child.row(i) = parent.row(i);
+    else {
+      child.row(i) = parent.row(i);
+      used_rows.emplace(n_parent, i);
+    }
   }
 
   return child;
 }
 
-std::pair<matrix<operation>, float> GeneticJobShop::GetBest(const std::vector<matrix<operation>>& schedules,
+std::pair<Matrix<operation>, float> GeneticJobShop::GetBest(const std::vector<Matrix<operation>>& schedules,
                                                             const std::vector<float>& fitness)
 {
   auto best = 0;

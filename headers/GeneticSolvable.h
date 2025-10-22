@@ -13,12 +13,11 @@ template <typename T>
 class GeneticSolvable
 {
 public:
+    virtual ~GeneticSolvable() = default;
     virtual T CrossOver(const std::vector<T>&) = 0;
     virtual T Mutate(T&) = 0;
     virtual std::pair<T, float> GetBest(const std::vector<T>&, const std::vector<float>&) = 0;
     virtual Problem<T>& GetProblem() = 0;
-protected:
-    ~GeneticSolvable() = default;
 };
 
 #endif //HALAL_GENETICSOLVABLE_H
