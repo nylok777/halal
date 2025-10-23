@@ -5,11 +5,13 @@
 #include "headers/QuadraticAssignmentProblem.h"
 #include <random>
 #include <unordered_set>
-#include <algorithm>
 #include <fstream>
 
+#include "headers/JobShopProblem.h"
+
 QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n, const int max_drought, const float drought_radius)
-    : n(n), max_drought(max_drought), drought_radius(drought_radius), weight_matrix(n), distance_matrix(n) {
+    : n(n), max_drought(max_drought), drought_radius(drought_radius), weight_matrix(n), distance_matrix(n)
+{
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_real_distribution<float> weight_dist(0.1, 10.0);
@@ -28,7 +30,8 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(const int n, const int ma
 }
 
 QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, int max_drought, float drought_radius)
-    : max_drought(max_drought), drought_radius(drought_radius) {
+    : max_drought(max_drought), drought_radius(drought_radius)
+{
     std::ifstream in(filename);
     if (!in) {
         throw std::runtime_error("Could not open file: " + filename);
@@ -36,8 +39,8 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, in
     int m;
     in >> m;
     this->n = m;
-    this->weight_matrix = symmetric_matrix<float>(n);
-    this->distance_matrix = symmetric_matrix<float>(n);
+    this->weight_matrix = SymmetricMatrix<float>(n);
+    this->distance_matrix = SymmetricMatrix<float>(n);
     float val;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -54,7 +57,8 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(std::string& filename, in
     }
 }
 
-std::vector<int> QuadraticAssignmentProblem::GenerateElement() const {
+std::vector<int> QuadraticAssignmentProblem::GenerateElement() const
+{
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> dist(0, this->n - 1);
@@ -75,7 +79,8 @@ std::vector<int> QuadraticAssignmentProblem::GenerateElement() const {
     return bijection;
 }
 
-float QuadraticAssignmentProblem::Objective(const std::vector<int>& p) const {
+float QuadraticAssignmentProblem::Objective(const std::vector<int>& p) const
+{
     float sum = 0.0;
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {
@@ -86,7 +91,8 @@ float QuadraticAssignmentProblem::Objective(const std::vector<int>& p) const {
     return sum;
 }
 
-bool QuadraticAssignmentProblem::StopCondition() const {
+bool QuadraticAssignmentProblem::StopCondition() const
+{
     if (fabsf(current_fitness - last_fitness) < drought_radius) {
         drought_count++;
     }
@@ -97,10 +103,12 @@ bool QuadraticAssignmentProblem::StopCondition() const {
     return drought_count >= max_drought;
 }
 
-void QuadraticAssignmentProblem::SetCurrentFitness(float fitness) const {
+void QuadraticAssignmentProblem::SetCurrentFitness(float fitness) const
+{
     current_fitness = fitness;
 }
 
-int QuadraticAssignmentProblem::ProblemSize() const {
+int QuadraticAssignmentProblem::ProblemSize() const
+{
     return n;
 }

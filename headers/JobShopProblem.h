@@ -8,31 +8,33 @@
 #include <limits>
 #include <vector>
 #include <iosfwd>
-#include "Matrix.h"
+#include "data_structures/DynamicMatrix.hpp"
 #include "Problem.h"
 
 struct operation
 {
     operation() = default;
     operation(const int job_id, const int precedence, const int machine_id, const float time);
-    int job_id;
-    int precedence;
-    int machine_id;
-    float time;
+    int job_id = 0;
+    int precedence = 0;
+    int machine_id = 0;
+    float time = 0.0;
     friend bool operator<(const operation& op1, const operation& op2);
-    friend std::ostream& operator<<(std::ostream& stream, const operation operation);
+    friend bool operator>(const operation& op1, const operation& op2);
+    friend bool operator==(const operation& op1, const operation& op2);
+    friend std::ostream& operator<<(std::ostream& stream, const operation& operation);
 };
 
-class JobShopProblem : public Problem<Matrix<operation>>
+class JobShopProblem final : public Problem<DynamicMatrix<operation>>
 {
 public:
-    virtual ~JobShopProblem() = default;
     JobShopProblem(int machines_num, int jobs_num, std::vector<operation>& ops);
-    [[nodiscard]] float Objective(const Matrix<operation>&) const override;
-    [[nodiscard]] Matrix<operation> GenerateElement() const override;
+    [[nodiscard]] float Objective(const DynamicMatrix<operation>&) const override;
+    [[nodiscard]] DynamicMatrix<operation> GenerateElement() const override;
     bool StopCondition() const override;
     void SetMakespan(const float makespan) const;
     int GetMachinesNumber() const;
+
 private:
     std::vector<operation> operations;
     int machines_num;

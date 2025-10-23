@@ -7,16 +7,18 @@
 #define HALAL_GENETICJOBSHOP_H
 #include "GeneticSolvable.h"
 #include "JobShopProblem.h"
-#include "Matrix.h"
+#include "data_structures/DynamicMatrix.hpp"
 
-class GeneticJobShop : public virtual GeneticSolvable<Matrix<operation>>
+class GeneticJobShop : public GeneticSolvable<DynamicMatrix<operation>>
 {
 public:
-    explicit GeneticJobShop(const JobShopProblem& job_shop_problem);
-    std::pair<Matrix<operation>, float> GetBest(const std::vector<Matrix<operation>>&, const std::vector<float>&) override;
-    Matrix<operation> Mutate(Matrix<operation>&) override;
-    Matrix<operation> CrossOver(const std::vector<Matrix<operation>>&) override;
+    explicit GeneticJobShop(JobShopProblem job_shop_problem);
+    std::pair<DynamicMatrix<operation>, float>
+    GetBest(const std::vector<DynamicMatrix<operation>>&, const std::vector<float>&) override;
+    DynamicMatrix<operation> Mutate(DynamicMatrix<operation>&) override;
+    DynamicMatrix<operation> CrossOver(const std::vector<DynamicMatrix<operation>>&) override;
     JobShopProblem& GetProblem() override;
+
 private:
     JobShopProblem job_shop_problem;
 };

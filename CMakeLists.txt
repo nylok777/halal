@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 4.0)
 project(halal)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 include_directories(.)
 
@@ -15,7 +15,7 @@ add_executable(halal
         headers/GeneticAlgorithmSolver.h
         headers/GeneticSolvable.h
         headers/JobShopProblem.h
-        headers/Matrix.h
+        data_structures/Matrix.hpp
         headers/DisjunctiveGraph.h
         DisjunctiveGraph.cpp
         JobShopProblem.cpp
@@ -26,11 +26,17 @@ add_executable(halal
         StochasticQuadraticAssignment.cpp
         headers/GeneticJobShop.h
         GeneticJobShop.cpp
+        data_structures/DynamicMatrix.hpp
+        data_structures/SymmetricMatrix.hpp
 )
 add_executable(test_target tests/tests.cpp
         tests/main.cpp
         tests/tests.h
         headers/JobShopProblem.h
-        headers/Matrix.h
+        headers/GeneticJobShop.h
+        headers/GeneticSolvable.h
+        GeneticJobShop.cpp
+        data_structures/Matrix.hpp
+        data_structures/DynamicMatrix.hpp
         JobShopProblem.cpp
 )

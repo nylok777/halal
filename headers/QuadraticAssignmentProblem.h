@@ -8,8 +8,11 @@
 #include <cmath>
 #include <string>
 #include <vector>
-#include "Matrix.h"
+
+#include "JobShopProblem.h"
+#include "../data_structures/Matrix.hpp"
 #include "Problem.h"
+#include "data_structures/SymmetricMatrix.hpp"
 
 class QuadraticAssignmentProblem final
     : public Problem<std::vector<int>>
@@ -33,8 +36,8 @@ private:
     int max_drought;
     float drought_radius;
     mutable int drought_count = 0;
-    symmetric_matrix<float> weight_matrix{n};
-    symmetric_matrix<float> distance_matrix{n};
+    SymmetricMatrix<float> weight_matrix{n};
+    SymmetricMatrix<float> distance_matrix{n};
 };
 
 #endif //HALAL_QUADRATICASSIGNMENTPROBLEM_H

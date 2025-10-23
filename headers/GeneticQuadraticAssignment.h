@@ -11,7 +11,6 @@
 class GeneticQuadraticAssignment : public GeneticSolvable<std::vector<int>>
 {
 public:
-    virtual ~GeneticQuadraticAssignment() = default;
 
     explicit GeneticQuadraticAssignment(QuadraticAssignmentProblem& quadratic_assignment_problem);
 
