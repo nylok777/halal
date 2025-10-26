@@ -33,7 +33,9 @@ public:
     [[nodiscard]] DynamicMatrix<operation> GenerateElement() const override;
     bool StopCondition() const override;
     void SetMakespan(const float makespan) const;
-    int GetMachinesNumber() const;
+    int NumberOfMachines() const;
+    int NumberOfOperations() const;
+    int NumberOfJobs() const;
 
 private:
     std::vector<operation> operations;

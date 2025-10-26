@@ -16,8 +16,6 @@ add_executable(halal
         headers/GeneticSolvable.h
         headers/JobShopProblem.h
         data_structures/Matrix.hpp
-        headers/DisjunctiveGraph.h
-        DisjunctiveGraph.cpp
         JobShopProblem.cpp
         headers/StochasticSolvable.h
         headers/GeneticQuadraticAssignment.h
@@ -29,14 +27,4 @@ add_executable(halal
         data_structures/DynamicMatrix.hpp
         data_structures/SymmetricMatrix.hpp
 )
-add_executable(test_target tests/tests.cpp
-        tests/main.cpp
-        tests/tests.h
-        headers/JobShopProblem.h
-        headers/GeneticJobShop.h
-        headers/GeneticSolvable.h
-        GeneticJobShop.cpp
-        data_structures/Matrix.hpp
-        data_structures/DynamicMatrix.hpp
-        JobShopProblem.cpp
-)
+add_subdirectory(halal_tests)

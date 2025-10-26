@@ -4,7 +4,6 @@
 #include "headers/GeneticJobShop.h"
 
 #include <algorithm>
-#include <set>
 #include <random>
 #include <utility>
 
@@ -56,7 +55,7 @@ DynamicMatrix<operation> GeneticJobShop::Mutate(DynamicMatrix<operation>& schedu
     operation* op1 = nullptr;
     operation* op2 = nullptr;
     while (!switch_success) {
-        std::uniform_int_distribution dist(0, schedule.RowNum() - 1);
+        std::uniform_int_distribution dist(0, schedule.RowCount() - 1);
 
         const auto machine = dist(gen);
         auto& row = schedule.Row(machine);
@@ -66,9 +65,9 @@ DynamicMatrix<operation> GeneticJobShop::Mutate(DynamicMatrix<operation>& schedu
         op1 = &row[dist(gen)];
         op2 = &row[dist(gen)];
         auto [op1_prev_pos, op1_next_pos] =
-            CheckSwitchValidity(machine, job_shop_problem.GetMachinesNumber(), schedule, *op1);
+            CheckSwitchValidity(machine, job_shop_problem.NumberOfMachines(), schedule, *op1);
         auto [op2_prev_pos, op2_next_pos] =
-            CheckSwitchValidity(machine, job_shop_problem.GetMachinesNumber(), schedule, *op2);
+            CheckSwitchValidity(machine, job_shop_problem.NumberOfMachines(), schedule, *op2);
         if (!(op2_pos <= op1_prev_pos || op2_pos >= op1_next_pos) &&
             !(op1_pos <= op2_prev_pos || op1_pos >= op2_next_pos)) {
             switch_success = true;
@@ -100,6 +99,56 @@ bool CheckRowCompatibility(const std::vector<operation>& row, const std::vector<
     return true;
 }
 
+
+DynamicMatrix<operation> GeneticJobShop::CrossOver(const std::vector<DynamicMatrix<operation>>& parents)
+{
+    std::random_device rand;
+    std::mt19937 gen{rand()};
+    std::uniform_int_distribution<int> rand_jobs{1, job_shop_problem.NumberOfJobs()};
+
+    std::vector<int> preserved_jobs;
+    for (int i = 0; i < job_shop_problem.NumberOfJobs() / 2; ++i)
+    {
+        preserved_jobs.push_back(rand_jobs(gen));
+    }
+
+    DynamicMatrix<operation> child{job_shop_problem.NumberOfMachines()};
+    child.Resize(job_shop_problem.NumberOfOperations());
+    auto parents_iter = parents.begin();
+    auto insert_operations = [&child](const int job_i, const DynamicMatrix<operation>& parent)
+    {
+        std::vector<std::pair<ptrdiff_t, operation>> i_job_ops;
+        for (auto iter = parent.begin(); iter != parent.end(); ++iter)
+        {
+            if ((*iter).job_id == job_i)
+            {
+                auto dist = std::distance(parent.begin(), iter);
+                i_job_ops.emplace_back(dist, (*iter));
+            }
+        }
+        for (const auto& [dist, op] : i_job_ops)
+        {
+            child.Insert(op.machine_id - 1, static_cast<int>(dist), op);
+        }
+    };
+    for (const auto job_i : preserved_jobs)
+    {
+        insert_operations(job_i, *parents_iter);
+    }
+    ++parents_iter;
+    std::ranges::sort(preserved_jobs);
+    std::vector<int> remaining_jobs{job_shop_problem.NumberOfJobs()};
+    auto all_jobs = std::ranges::views::iota(job_shop_problem.NumberOfJobs());
+    std::ranges::set_difference(all_jobs.begin(), all_jobs.end(), preserved_jobs.begin(),
+                                preserved_jobs.end(), remaining_jobs.begin());
+    for (const auto job_i : remaining_jobs)
+    {
+        insert_operations(job_i, *parents_iter);
+    }
+}
+
+
+/*
 DynamicMatrix<operation> GeneticJobShop::CrossOver(
     const std::vector<DynamicMatrix<operation>>& parents)
 {
@@ -143,6 +192,7 @@ DynamicMatrix<operation> GeneticJobShop::CrossOver(
 
     return child;
 }
+*/
 
 std::pair<DynamicMatrix<operation>, float> GeneticJobShop::GetBest(
     const std::vector<DynamicMatrix<operation>>& schedules,
