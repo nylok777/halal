@@ -1,7 +1,7 @@
 //
 // Created by david on 10/5/25.
 //
-#include "StochasticQuadraticAssignment.h"
+#include "headers/StochasticQuadraticAssignment.h"
 
 #include <algorithm>
 #include <random>
@@ -11,12 +11,11 @@
 StochasticQuadraticAssignment::StochasticQuadraticAssignment(QuadraticAssignmentProblem quadratic_assignment_problem)
     : quadratic_assignment_problem(std::move(quadratic_assignment_problem)) {}
 
-QuadraticAssignmentProblem& StochasticQuadraticAssignment::GetProblem() {
-    return quadratic_assignment_problem;
-}
+QuadraticAssignmentProblem& StochasticQuadraticAssignment::GetProblem() { return quadratic_assignment_problem; }
 
 
-std::vector<int> StochasticQuadraticAssignment::GenerateNeighbour(const std::vector<int>& p, const float eps) const {
+std::vector<int> StochasticQuadraticAssignment::GenerateNeighbour(const std::vector<int>& p, const float eps) const
+{
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> dist(0, quadratic_assignment_problem.ProblemSize() - 1);
@@ -35,9 +34,7 @@ std::vector<int> StochasticQuadraticAssignment::GenerateNeighbour(const std::vec
                 used.insert(idx);
                 b = false;
             }
-            else {
-                idx = dist(gen);
-            }
+            else { idx = dist(gen); }
         }
     }
 

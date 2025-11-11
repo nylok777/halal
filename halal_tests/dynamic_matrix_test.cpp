@@ -4,6 +4,7 @@
 #include "gtest/gtest.h"
 #include "../data_structures/DynamicMatrix.hpp"
 
+
 class DynamicMatrixTest : public ::testing::Test
 {
 protected:
@@ -19,7 +20,8 @@ protected:
     DynamicMatrix<int> matrix;
 };
 
-TEST_F(DynamicMatrixTest, IteratorWorksBasic)
+
+TEST_F(DynamicMatrixTest, IteratorTest)
 {
     int elem1 = matrix.Row(0).at(0);
     int elem_from_begin = *matrix.begin();
@@ -36,4 +38,10 @@ TEST_F(DynamicMatrixTest, IteratorWorksBasic)
     ++row2_begin;
     ++row2_begin;
     ASSERT_EQ(row2_begin, matrix.end());
+}
+
+TEST_F(DynamicMatrixTest, InsertTest)
+{
+    matrix.Insert(1, 0, 6);
+    ASSERT_EQ(matrix.At(1, 0), 6);
 }

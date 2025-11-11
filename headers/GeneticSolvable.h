@@ -1,7 +1,6 @@
 //
 // Created by david on 9/21/25.
 //
-#pragma once
 
 #ifndef HALAL_GENETICSOLVABLE_H
 #define HALAL_GENETICSOLVABLE_H

@@ -1,7 +1,6 @@
 //
 // Created by david on 9/22/25.
 //
-#pragma once
 
 #ifndef HALAL_JOBSHOPPROBLEM_H
 #define HALAL_JOBSHOPPROBLEM_H
@@ -29,9 +28,11 @@ class JobShopProblem final : public Problem<DynamicMatrix<operation>>
 {
 public:
     JobShopProblem(int machines_num, int jobs_num, std::vector<operation>& ops);
+    static JobShopProblem LoadFromFile(const std::string& path);
     [[nodiscard]] float Objective(const DynamicMatrix<operation>&) const override;
     [[nodiscard]] DynamicMatrix<operation> GenerateElement() const override;
     bool StopCondition() const override;
+    const std::vector<operation>& GetOperations() const;
     void SetMakespan(const float makespan) const;
     int NumberOfMachines() const;
     int NumberOfOperations() const;
@@ -47,4 +48,6 @@ private:
     mutable float current_makespan = std::numeric_limits<float>::max();
     mutable float last_makespan = 0.0;
 };
+
+void ActiveScheduleFromInactiveGT(const JobShopProblem& job_shop_problem, DynamicMatrix<operation>& schedule);
 #endif //HALAL_JOBSHOPPROBLEM_H

@@ -5,10 +5,10 @@
 
 #ifndef HALAL_STOCHASTICQUADRATICASSIGNMENT_H
 #define HALAL_STOCHASTICQUADRATICASSIGNMENT_H
-#include "headers/StochasticSolvable.h"
+#include "StochasticSolvable.h"
 #include <vector>
 
-#include "headers/QuadraticAssignmentProblem.h"
+#include "QuadraticAssignmentProblem.h"
 
 class StochasticQuadraticAssignment : StochasticSolvable<std::vector<int>>
 {

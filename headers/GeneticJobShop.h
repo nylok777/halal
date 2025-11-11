@@ -1,7 +1,6 @@
 //
 // Created by david on 10/5/25.
 //
-#pragma once
 
 #ifndef HALAL_GENETICJOBSHOP_H
 #define HALAL_GENETICJOBSHOP_H
@@ -9,7 +8,7 @@
 #include "JobShopProblem.h"
 #include "data_structures/DynamicMatrix.hpp"
 
-class GeneticJobShop : public GeneticSolvable<DynamicMatrix<operation>>
+class GeneticJobShop final : public GeneticSolvable<DynamicMatrix<operation>>
 {
 public:
     explicit GeneticJobShop(JobShopProblem job_shop_problem);
