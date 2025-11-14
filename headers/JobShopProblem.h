@@ -7,8 +7,8 @@
 #include <limits>
 #include <vector>
 #include <iosfwd>
-#include "data_structures/DynamicMatrix.hpp"
-#include "Problem.h"
+#include "DynamicMatrix.hpp"
+#include "ProblemRepresentation.h"
 
 struct operation
 {
@@ -24,18 +24,30 @@ struct operation
     friend std::ostream& operator<<(std::ostream& stream, const operation& operation);
 };
 
-class JobShopProblem final : public Problem<DynamicMatrix<operation>>
+struct jobshop_schedule
+{
+    DynamicMatrix<operation> rep;
+    float score = 0.0f;
+    bool operator<(const jobshop_schedule& other) const { return score < other.score; }
+};
+
+class JobShopProblem : public ProblemRepresentation<jobshop_schedule>
 {
 public:
     JobShopProblem(int machines_num, int jobs_num, std::vector<operation>& ops);
+
     static JobShopProblem LoadFromFile(const std::string& path);
-    [[nodiscard]] float Objective(const DynamicMatrix<operation>&) const override;
-    [[nodiscard]] DynamicMatrix<operation> GenerateElement() const override;
-    bool StopCondition() const override;
+
+    [[nodiscard]] float Objective(const jobshop_schedule&) const override;
+
+    [[nodiscard]] jobshop_schedule GenerateInstance() const override;
+
     const std::vector<operation>& GetOperations() const;
-    void SetMakespan(const float makespan) const;
+
     int NumberOfMachines() const;
+
     int NumberOfOperations() const;
+
     int NumberOfJobs() const;
 
 private:
@@ -49,5 +61,11 @@ private:
     mutable float last_makespan = 0.0;
 };
 
-void ActiveScheduleFromInactiveGT(const JobShopProblem& job_shop_problem, DynamicMatrix<operation>& schedule);
+jobshop_schedule ActiveScheduleFromInactive(
+    const int n_operations,
+    const int n_jobs,
+    const int n_machines,
+    std::vector<operation>&& operations,
+    DynamicMatrix<operation>& schedule);
+
 #endif //HALAL_JOBSHOPPROBLEM_H

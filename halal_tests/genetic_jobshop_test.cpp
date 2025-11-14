@@ -15,16 +15,18 @@ protected:
 
 TEST_F(GeneticJobshopTest, CrossOverTest)
 {
-    auto parent1 = genetic_job_shop.GetProblem().GenerateElement();
-    auto parent2 = genetic_job_shop.GetProblem().GenerateElement();
+    auto parent1 = genetic_job_shop.GenerateInstance();
+    auto parent2 = genetic_job_shop.GenerateInstance();
     std::vector parents{std::move(parent1), std::move(parent2)};
     auto child = genetic_job_shop.CrossOver(parents);
-    ASSERT_EQ(child.RowCount(), 5);
-    ASSERT_EQ(child.Size(), 50);
-    ASSERT_EQ(child.SizeOfRow(0), 10);
+    ASSERT_EQ(child.rep.RowCount(), 5);
+    ASSERT_EQ(child.rep.Size(), 50);
+    ASSERT_EQ(child.rep.SizeOfRow(0), 10);
     auto row_is_correct = [&child](const int row_idx)
     {
-        return std::ranges::all_of(child.Row(row_idx), [row_idx](auto& op) { return op.machine_id == row_idx + 1; });
+        return std::ranges::all_of(
+            child.rep.Row(row_idx),
+            [row_idx](auto& op) { return op.machine_id == row_idx + 1; });
     };
 
     ASSERT_EQ(row_is_correct(0), true);

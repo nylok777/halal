@@ -8,19 +8,19 @@
 #include "GeneticSolvable.h"
 #include "QuadraticAssignmentProblem.h"
 
-class GeneticQuadraticAssignment : public GeneticSolvable<std::vector<int>>
+class GeneticQuadraticAssignment final : public GeneticSolvable<assignment>
 {
 public:
-
     explicit GeneticQuadraticAssignment(QuadraticAssignmentProblem& quadratic_assignment_problem);
 
-    std::vector<int> CrossOver(const std::vector<std::vector<int>>&) override;
+    assignment CrossOver(const std::vector<assignment>&) override;
 
-    std::vector<int> Mutate(std::vector<int>&) override;
+    void Mutate(assignment&) override;
 
-    std::pair<std::vector<int>, float> GetBest(const std::vector<std::vector<int>>&, const std::vector<float>&) override;
+    assignment GetBest(const std::vector<assignment>&) override;
 
-    QuadraticAssignmentProblem& GetProblem() override;
+    assignment GenerateInstance() override;
+
 private:
     QuadraticAssignmentProblem quadratic_assignment_problem;
 };

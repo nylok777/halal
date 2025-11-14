@@ -5,16 +5,18 @@ set(CMAKE_CXX_STANDARD 20)
 
 include_directories(.)
 add_executable(halal
-        QuadraticAssignmentProblem.cpp
+        source/QuadraticAssignmentProblem.cpp
         main.cpp
         headers/GeneticAlgorithmSolver.hpp
-        data_structures/Matrix.hpp
-        JobShopProblem.cpp
-        GeneticQuadraticAssignment.cpp
-        StochasticQuadraticAssignment.cpp
-        GeneticJobShop.cpp
-        data_structures/DynamicMatrix.hpp
-        data_structures/SymmetricMatrix.hpp
+        source/JobShopProblem.cpp
+        source/GeneticQuadraticAssignment.cpp
+        source/GeneticJobShop.cpp
+        headers/DynamicMatrix.hpp
+        headers/SymmetricMatrix.hpp
+        headers/Solution.h
+        source/StochasticQuadraticAssignment.cpp
         headers/SimulatedAnnealingSolver.hpp
+        source/StopCondition.cpp
+        headers/StopCondition.h
 )
 #add_subdirectory(halal_tests)

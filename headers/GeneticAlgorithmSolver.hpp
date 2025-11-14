@@ -8,110 +8,97 @@
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <memory>
 #include "GeneticSolvable.h"
+#include "StopCondition.h"
 
-template<typename T>
+
+template <Solution T, StopConditionFunctor S>
 class GeneticAlgorithmSolver
 {
-    GeneticSolvable<T>* solvable;
 public:
-    explicit GeneticAlgorithmSolver(GeneticSolvable<T>& solvable);
-    std::vector<T> InitPopulation(const int&);
-    std::vector<float> Evaluation(const std::vector<T>&);
-    std::vector<T> Selection(const std::vector<T>&, const std::vector<float>&, const int&);
-    std::vector<T> Reinsertion(std::vector<T>&, std::vector<T>&);
+    GeneticAlgorithmSolver(std::unique_ptr<GeneticSolvable<T>>&& solvable, S stop_condition)
+        : solvable(std::move(solvable)), stop_condition(stop_condition) {}
 
-    std::pair<T, float> GeneticAlgorithm(const int& k, const int& population_size, const int& parents_size);
+    //GeneticAlgorithmSolver(std::unique_ptr<GeneticSolvable<T>>&& solvable, StopConditionMaxIterations&& stop_condition);
+    //GeneticAlgorithmSolver(std::unique_ptr<GeneticSolvable<T>>&& solvable, StopConditionMinChangeRate&& stop_condition);
+
+    std::vector<T> InitPopulation(const int population_size)
+    {
+        std::vector < T > population;
+        population.reserve(population_size);
+        for (int i = 0; i < population_size; ++i) {
+            population.push_back(solvable->GenerateInstance());
+        }
+        return population;
+    }
+
+    std::vector<T> Selection(std::vector<T>& population, const int parents_pool_size)
+    {
+        std::ranges::sort(population, [](const auto& x, const auto& y) { return x.score < y.score; });
+        std::vector < T > selected;
+        selected.reserve(parents_pool_size);
+        for (int i = 0; i < parents_pool_size; ++i) {
+            selected.push_back(population[i]);
+        }
+        return selected;
+    }
+
+    std::vector<T> Reinsertion(const std::vector<T>& old_gen, const std::vector<T>& new_gen)
+    {
+        std::vector < T > new_population;
+        new_population.reserve(old_gen.size());
+        for (const auto& new_gen_instance : new_gen) new_population.push_back(new_gen_instance);
+        for (int i = 0; i < old_gen.size() - new_gen.size(); ++i) {
+            new_population.push_back(old_gen[i]);
+        }
+        return new_population;
+    }
+
+    T GeneticAlgorithm(
+        const int n_parents,
+        const int population_size,
+        const int parents_pool_size,
+        const int new_gen_size,
+        const float mutation_rate);
+
+private:
+    std::unique_ptr<GeneticSolvable<T>> solvable;
+    S stop_condition;
 };
 
-template <typename T>
-GeneticAlgorithmSolver<T>::GeneticAlgorithmSolver(GeneticSolvable<T>& solvable)
-    : solvable(&solvable) {}
 
-template <typename T>
-std::vector<T> GeneticAlgorithmSolver<T>::InitPopulation(const int& size) {
-    auto population = std::vector<std::vector<int>>();
-    for (int i = 0; i < size; ++i) {
-        auto p = solvable->GetProblem().GenerateElement();
-        population.push_back(p);
-    }
-    return population;
-}
-
-template <typename T>
-std::vector<float> GeneticAlgorithmSolver<T>::Evaluation(const std::vector<T>& population) {
-    auto fitness = std::vector<float>();
-    for (auto p : population) {
-        fitness.push_back(solvable->GetProblem().Objective(p));
-    }
-    return fitness;
-}
-
-template <typename T>
-std::vector<T> GeneticAlgorithmSolver<T>::Selection(const std::vector<T>& population, const std::vector<float>& fitness,
-                                           const int& m) {
-    auto p_fit_pairs = std::vector<std::pair<T, float>>();
-    for (int i = 0; i < population.size(); ++i) {
-        p_fit_pairs.emplace_back(population[i], fitness[i]);
-    }
-    std::sort(p_fit_pairs.begin(), p_fit_pairs.end(), [](std::pair<T, float> a, std::pair<T, float> b) {
-        return a.second < b.second;
-    });
-    auto selected = std::vector<std::vector<int>>();
-    for (int i = 0; i < m; ++i) {
-        selected.push_back(p_fit_pairs[i].first);
-    }
-    return selected;
-}
-
-template <typename T>
-std::vector<T> GeneticAlgorithmSolver<T>::Reinsertion(std::vector<T>& old_gen, std::vector<T>& new_gen) {
-    std::random_device rnd;
-    std::mt19937 gen{rnd()};
-    std::uniform_int_distribution<> dist(0, 1);
-    auto new_population = std::vector<T>();
-    auto new_count = 0;
-    auto old_count = 0;
-    for (int i = 0; i < old_gen.size(); ++i) {
-        int choice = dist(gen);
-        if (choice == 1 && new_count < new_gen.size()) {
-            new_population.push_back(new_gen[new_count]);
-            new_count++;
-        }
-        else if (old_count < old_gen.size()) {
-            new_population.push_back(old_gen[old_count]);
-            old_count++;
-        }
-    }
-    return new_population;
-}
-
-
-template <typename T>
-std::pair<T, float> GeneticAlgorithmSolver<T>::GeneticAlgorithm(const int& k, const int& population_size, const int& parents_size) {
-    std::random_device rnd;
-    std::mt19937 gen{rnd()};
-    std::uniform_int_distribution dist(0, parents_size - 1);
+template <Solution T, StopConditionFunctor S>
+T GeneticAlgorithmSolver<T, S>::GeneticAlgorithm(
+    const int n_parents,
+    const int population_size,
+    const int parents_pool_size,
+    const int new_gen_size,
+    const float mutation_rate)
+{
+    std::mt19937 gen{std::random_device{}()};
+    std::uniform_int_distribution dist{0, parents_pool_size - 1};
+    std::uniform_real_distribution<float> real_dist{0.0, 1.0};
 
     auto population = InitPopulation(population_size);
-    auto pop_fitness = Evaluation(population);
-    auto p_best = solvable->GetBest(population, pop_fitness);
-    while (!solvable->GetProblem().StopCondition()) {
-        auto parents = Selection(population, pop_fitness, parents_size);
-        auto new_gen = std::vector<T>();
-        while (new_gen.size() < parents.size()) {
-            auto c_parents = std::vector<T>();
-            for (int i = 0; i < k; ++i) {
-                c_parents.push_back(parents[dist(gen)]);
+    auto p_best = solvable->GetBest(population);
+    while (StopCondition(stop_condition, p_best.score)) {
+        auto parents = Selection(population, parents_pool_size);
+        std::vector < T > new_gen;
+        new_gen.reserve(new_gen_size);
+        for (int i = 0; i < new_gen_size; ++i) {
+            std::vector < T > current_child_parents;
+            current_child_parents.reserve(n_parents);
+            for (int j = 0; j < n_parents; ++j) {
+                current_child_parents.push_back(parents[dist(gen)]);
             }
-            auto c = solvable->CrossOver(c_parents);
-            c = solvable->Mutate(c);
-            new_gen.push_back(c);
+            auto child = solvable->CrossOver(current_child_parents);
+            if (real_dist(gen) < mutation_rate) solvable->Mutate(child);
+            new_gen.push_back(child);
         }
         population = Reinsertion(population, new_gen);
-        pop_fitness = Evaluation(population);
-        auto q_best = solvable->GetBest(population, pop_fitness);
-        if (q_best.second < p_best.second) p_best = q_best;
+        auto q_best = solvable->GetBest(population);
+        if (q_best < p_best) p_best = q_best;
     }
     return p_best;
 }

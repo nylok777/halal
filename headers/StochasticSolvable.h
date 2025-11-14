@@ -4,15 +4,14 @@
 
 #ifndef HALAL_STOCHASTICSOLVABLE_H
 #define HALAL_STOCHASTICSOLVABLE_H
+#include "Solution.h"
 
-#include "headers/Problem.h"
-
-template<typename T>
+template <Solution T>
 class StochasticSolvable
 {
 public:
     virtual ~StochasticSolvable() = default;
     virtual T GenerateNeighbour(const T&, float eps) const = 0;
-    virtual Problem<T>& GetProblem() = 0;
+    virtual T GenerateInstance() = 0;
 };
 #endif //HALAL_STOCHASTICSOLVABLE_H
