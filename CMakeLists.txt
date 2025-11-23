@@ -1,12 +1,37 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.3...4.0)
 project(halal)
-
 set(CMAKE_CXX_STANDARD 20)
 
+include(GNUInstallDirs)
+
+add_library(tsp_solver SHARED
+        source/TravelingSalesmanProblem.cpp
+        source/GeneticTravelingSalesman.cpp
+        source/StopCondition.cpp
+        headers/Solution.h
+        headers/GeneticAlgorithmSolver.hpp
+        tsp_solver.cpp
+)
+
+set(TSP_HEADERS
+        "include/tsp_solver.h"
+        "include/tsp_solver_c.h"
+)
+
+set_target_properties(tsp_solver PROPERTIES
+        PUBLIC_HEADER "${TSP_HEADERS}"
+)
+
 include_directories(.)
+
+install(TARGETS tsp_solver
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
 add_executable(halal
-        source/QuadraticAssignmentProblem.cpp
         main.cpp
+        source/QuadraticAssignmentProblem.cpp
         headers/GeneticAlgorithmSolver.hpp
         source/JobShopProblem.cpp
         source/GeneticQuadraticAssignment.cpp
@@ -18,5 +43,9 @@ add_executable(halal
         headers/SimulatedAnnealingSolver.hpp
         source/StopCondition.cpp
         headers/StopCondition.h
+        source/TravelingSalesmanProblem.cpp
+        source/GeneticTravelingSalesman.cpp
 )
+
+install()
 #add_subdirectory(halal_tests)

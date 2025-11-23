@@ -4,13 +4,14 @@
 #ifndef HALAL_PROBLEM_H
 #define HALAL_PROBLEM_H
 
-template <typename T>
+template <typename T, typename Number>
 class ProblemRepresentation
 {
 public:
+    using NumberType = Number;
     virtual ~ProblemRepresentation() = default;
     virtual T GenerateInstance() const = 0;
-    virtual float Objective(const T&) const = 0;
+    virtual Number Objective(const T&) const = 0;
 };
 
 

@@ -20,9 +20,7 @@ public:
     GeneticAlgorithmSolver(std::unique_ptr<GeneticSolvable<T>>&& solvable, S stop_condition)
         : solvable(std::move(solvable)), stop_condition(stop_condition) {}
 
-    //GeneticAlgorithmSolver(std::unique_ptr<GeneticSolvable<T>>&& solvable, StopConditionMaxIterations&& stop_condition);
-    //GeneticAlgorithmSolver(std::unique_ptr<GeneticSolvable<T>>&& solvable, StopConditionMinChangeRate&& stop_condition);
-
+private:
     std::vector<T> InitPopulation(const int population_size)
     {
         std::vector < T > population;
@@ -54,7 +52,7 @@ public:
         }
         return new_population;
     }
-
+public:
     T GeneticAlgorithm(
         const int n_parents,
         const int population_size,

@@ -18,7 +18,7 @@ struct assignment
 };
 
 class QuadraticAssignmentProblem final
-    : public ProblemRepresentation<std::vector<int>>
+    : public ProblemRepresentation<std::vector<int>, float>
 {
 public:
     QuadraticAssignmentProblem(const std::string& filename);
