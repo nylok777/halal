@@ -6,31 +6,30 @@
 
 #include <algorithm>
 #include <random>
+#include <ranges>
 
-GeneticTravelingSalesman::GeneticTravelingSalesman(const std::vector<location>& all_locations)
+GeneticTravelingSalesman::GeneticTravelingSalesman(std::vector<location>& all_locations)
     : tsp(TravelingSalesmanProblem{all_locations}) {}
 
 
 route GeneticTravelingSalesman::CrossOver(const std::vector<route>& parents)
 {
-    std::mt19937 gen{std::random_device{}()};
-    std::uniform_int_distribution subroute_length_dist{1, tsp.NumberOfLocations() / 2 - 1};
     std::vector<location> child;
-    child.push_back(parents.front().rep.front());
+    child.reserve(tsp.NumberOfLocations());
+    child.push_back(parents[0].rep.front());
+    const auto parent_length = static_cast<int>(tsp.NumberOfLocations() / parents.size());
     while (child.size() < tsp.NumberOfLocations()) {
-        auto length = subroute_length_dist(gen);
-        auto start = 1;
-        for (const auto& [rep, score] : parents) {
-            const auto child_prev_size = static_cast<int>(child.size());
-            if (const auto remaining_size = tsp.NumberOfLocations() - child_prev_size; remaining_size < length) {
-                length = remaining_size;
+        for (const auto & parent : parents) {
+            int length = 0;
+            auto it = parent.rep.cbegin();
+            for (; length <= parent_length && it != parent.rep.cend(); ++it) {
+                if (std::ranges::none_of(child, [&it](const auto& loc){ return it->id == loc.id; })) {
+                    child.push_back(*it);
+                    if (child.size() == tsp.NumberOfLocations()) break;
+                    ++length;
+                }
             }
-            auto start_iter = child.cbegin() + start;
-            std::copy_if(start_iter, start_iter + length, std::back_inserter(child), [&child](const auto& loc)
-            {
-                return std::ranges::none_of(child, [&loc](const auto& x){ return x.id == loc.id; });
-            });
-            start += start < tsp.NumberOfLocations() ? static_cast<int>(child.size()) - child_prev_size : 1;
+            if (length <= parent_length && it != parent.rep.cend()) break;
         }
     }
     const auto score = tsp.Objective(child);

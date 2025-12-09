@@ -3,7 +3,7 @@
 //
 #include <gtest/gtest.h>
 
-#include "../headers/JobShopProblem.h"
+#include "headers/JobShopProblem.h"
 
 
 class JobshopTest : public ::testing::Test

@@ -17,7 +17,7 @@ struct route
 class GeneticTravelingSalesman final : public GeneticSolvable<route>
 {
 public:
-    explicit GeneticTravelingSalesman(const std::vector<location>& all_locations);
+    explicit GeneticTravelingSalesman(std::vector<location>& all_locations);
     route CrossOver(const std::vector<route>&) override;
     void Mutate(route&) override;
     route GetBest(const std::vector<route>&) override;

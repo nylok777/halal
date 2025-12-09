@@ -18,5 +18,9 @@ add_executable(halal_tests_run dynamic_matrix_test.cpp
         jobshop_test.cpp
         ../source/JobShopProblem.cpp
         ../source/GeneticJobShop.cpp
+        ../source/TravelingSalesmanProblem.cpp
+        ../source/GeneticTravelingSalesman.cpp
+        ../source/StopCondition.cpp
+        traveling_salesman_test.cpp
 )
 target_link_libraries(halal_tests_run gtest gtest_main)

@@ -7,12 +7,14 @@
 #include <random>
 #include <ranges>
 
-location::location(const int id, const std::forward_list<distance_from_location>& distances)
-    : id(id), distances(distances) {}
+location::location(const int id, std::vector<distance_from_location>& distances)
+    : id(id), distances(std::move(distances))
+{
+    std::ranges::sort(distances, [](const auto& x, const auto& y) { return x.first < y.first; });
+}
 
-TravelingSalesmanProblem::TravelingSalesmanProblem(const std::vector<location>& all_locations)
-    : all_locations(all_locations){}
-
+TravelingSalesmanProblem::TravelingSalesmanProblem(std::vector<location>& all_locations)
+    : all_locations(std::move(all_locations)){}
 
 std::vector<location> TravelingSalesmanProblem::GenerateInstance() const
 {

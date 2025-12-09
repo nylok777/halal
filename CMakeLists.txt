@@ -10,12 +10,14 @@ add_library(tsp_solver SHARED
         source/StopCondition.cpp
         headers/Solution.h
         headers/GeneticAlgorithmSolver.hpp
+        headers/location.h
         tsp_solver.cpp
 )
 
 set(TSP_HEADERS
-        "include/tsp_solver.h"
         "include/tsp_solver_c.h"
+        "include/tsp_solver.h"
+        "headers/location.h"
 )
 
 set_target_properties(tsp_solver PROPERTIES
@@ -23,6 +25,7 @@ set_target_properties(tsp_solver PROPERTIES
 )
 
 include_directories(.)
+include_directories("headers")
 
 install(TARGETS tsp_solver
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -31,6 +34,7 @@ install(TARGETS tsp_solver
 
 add_executable(halal
         main.cpp
+        tsp_solver.cpp
         source/QuadraticAssignmentProblem.cpp
         headers/GeneticAlgorithmSolver.hpp
         source/JobShopProblem.cpp
