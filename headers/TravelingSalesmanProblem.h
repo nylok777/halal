@@ -5,15 +5,31 @@
 #ifndef HALAL_TRAVELINGSALESMANPROBLEM_H
 #define HALAL_TRAVELINGSALESMANPROBLEM_H
 #include <vector>
-#include "location.h"
 #include "ProblemRepresentation.h"
 
-class TravelingSalesmanProblem final : public ProblemRepresentation<std::vector<location>, double>
+using distance_from_location = std::pair<int, double>;
+
+struct location
+{
+    location() = default;
+    location(const int id, std::vector<distance_from_location>& distances);
+    int id;
+    std::vector<distance_from_location> distances;
+};
+
+struct route
+{
+    std::vector<location> rep;
+    double score = 0.0;
+    bool operator<(const route& other) const { return score < other.score; }
+};
+
+class TravelingSalesmanProblem final : public ProblemRepresentation<route, double>
 {
 public:
     explicit TravelingSalesmanProblem(std::vector<location>& all_locations);
-    [[nodiscard]] std::vector<location> GenerateInstance() const override;
-    [[nodiscard]] double Objective(const std::vector<location>&) const override;
+    [[nodiscard]] route GenerateInstance() const override;
+    [[nodiscard]] double Objective(const route&) const override;
     [[nodiscard]] int NumberOfLocations() const;
 private:
     std::vector<location> all_locations;

@@ -7,12 +7,6 @@
 #include "GeneticSolvable.h"
 #include "TravelingSalesmanProblem.h"
 
-struct route
-{
-    std::vector<location> rep;
-    double score;
-    bool operator<(const route& other) const { return score < other.score; }
-};
 
 class GeneticTravelingSalesman final : public GeneticSolvable<route>
 {

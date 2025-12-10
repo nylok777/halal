@@ -5,9 +5,9 @@
 #ifndef HALAL_GENETICSOLVABLE_H
 #define HALAL_GENETICSOLVABLE_H
 #include <vector>
-#include "Solution.h"
+#include "SolutionCandidate.h"
 
-template <Solution T>
+template <SolutionCandidate T>
 class GeneticSolvable
 {
 public:

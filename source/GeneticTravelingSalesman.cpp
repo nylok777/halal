@@ -14,33 +14,32 @@ GeneticTravelingSalesman::GeneticTravelingSalesman(std::vector<location>& all_lo
 
 route GeneticTravelingSalesman::CrossOver(const std::vector<route>& parents)
 {
-    std::vector<location> child;
-    child.reserve(tsp.NumberOfLocations());
-    child.push_back(parents[0].rep.front());
+    std::vector<location> child_locations;
+    child_locations.reserve(tsp.NumberOfLocations());
+    child_locations.push_back(parents[0].rep.front());
     const auto parent_length = static_cast<int>(tsp.NumberOfLocations() / parents.size());
-    while (child.size() < tsp.NumberOfLocations()) {
+    while (child_locations.size() < tsp.NumberOfLocations()) {
         for (const auto & parent : parents) {
             int length = 0;
             auto it = parent.rep.cbegin();
             for (; length <= parent_length && it != parent.rep.cend(); ++it) {
-                if (std::ranges::none_of(child, [&it](const auto& loc){ return it->id == loc.id; })) {
-                    child.push_back(*it);
-                    if (child.size() == tsp.NumberOfLocations()) break;
+                if (std::ranges::none_of(child_locations, [&it](const auto& loc){ return it->id == loc.id; })) {
+                    child_locations.push_back(*it);
+                    if (child_locations.size() == tsp.NumberOfLocations()) break;
                     ++length;
                 }
             }
             if (length <= parent_length && it != parent.rep.cend()) break;
         }
     }
-    const auto score = tsp.Objective(child);
-    return route{std::move(child), score};
+    route child{std::move(child_locations)};
+    child.score = tsp.Objective(child);
+    return child;
 }
 
 route GeneticTravelingSalesman::GenerateInstance()
 {
-    auto instance = tsp.GenerateInstance();
-    const auto score = tsp.Objective(instance);
-    return route{std::move(instance), score};
+    return tsp.GenerateInstance();
 }
 
 route GeneticTravelingSalesman::GetBest(const std::vector<route>& population)

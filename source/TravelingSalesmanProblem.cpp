@@ -16,20 +16,21 @@ location::location(const int id, std::vector<distance_from_location>& distances)
 TravelingSalesmanProblem::TravelingSalesmanProblem(std::vector<location>& all_locations)
     : all_locations(std::move(all_locations)){}
 
-std::vector<location> TravelingSalesmanProblem::GenerateInstance() const
+route TravelingSalesmanProblem::GenerateInstance() const
 {
     std::mt19937 gen{std::random_device{}()};
     std::vector<location> locations = all_locations;
     std::shuffle(locations.begin() + 1, locations.end(), gen);
-    return locations;
+    route route{std::move(locations)};
+    return route;
 }
 
-double TravelingSalesmanProblem::Objective(const std::vector<location>& locations) const
+double TravelingSalesmanProblem::Objective(const route& route) const
 {
     double total_distance = 0.0;
-    for (auto iter = locations.cbegin(); iter != locations.cend(); ++iter) {
+    for (auto iter = route.rep.cbegin(); iter != route.rep.cend(); ++iter) {
         auto next = std::next(iter);
-        if (next == locations.cend()) break;
+        if (next == route.rep.cend()) break;
         const auto dist = std::ranges::find_if(iter->distances, [&next](const auto x)
         {
             return x.first == next->id;

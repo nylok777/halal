@@ -13,7 +13,7 @@
 #include "StopCondition.h"
 
 
-template <Solution T, StopConditionFunctor S>
+template <SolutionCandidate T, StopConditionFunctor S>
 class GeneticAlgorithmSolver
 {
 public:
@@ -66,7 +66,7 @@ private:
 };
 
 
-template <Solution T, StopConditionFunctor S>
+template <SolutionCandidate T, StopConditionFunctor S>
 T GeneticAlgorithmSolver<T, S>::GeneticAlgorithm(
     const int n_parents,
     const int population_size,
