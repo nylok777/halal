@@ -9,7 +9,7 @@ StopConditionMinChangeRate::StopConditionMinChangeRate(const float min_change_ra
 
 bool StopConditionMinChangeRate::operator()(const float score)
 {
-    if (std::fabsf(score) - std::fabsf(last_score) < std::fabsf(min_change_rate)) {
+    if ((std::fabsf(score) - std::fabsf(last_score)) / std::fabsf(last_score) * 100.0f < std::fabsf(min_change_rate)) {
         ++fails_count;
     } else {
         fails_count = 0;

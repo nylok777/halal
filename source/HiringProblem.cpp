@@ -2,11 +2,10 @@
 // Created by david on 12/10/25.
 //
 #include "HiringProblem.h"
-#include "RangesExt.h"
+#include "GeneticSolvable.h"
 
 #include <algorithm>
 #include <random>
-#include <ranges>
 
 HiringProblem::HiringProblem(const std::string& filename, const int n_people_to_hire)
     : WorkAssignmentProblem(), n_people_to_hire(n_people_to_hire)
@@ -53,4 +52,19 @@ std::vector<std::function<float(candidate_selection&)>> HiringProblem::GetObject
         return avgQuality(x.candidates);
     }};
     return {std::move(sum_salary), std::move(avg_quality)};
+}
+
+template<>
+candidate_selection CrossOver(const candidate_selection& parent1, const candidate_selection& parent2)
+{
+    std::vector<int> child; child.reserve(parent1.candidates.size());
+    for (int i = 0; i < parent1.candidates.size() / 2; ++i) {
+        child.push_back(parent1.candidates[i]);
+    }
+    for (int i = 0; i < parent2.candidates.size() && child.size() < parent2.candidates.size(); ++i) {
+        if (std::ranges::find(child, parent2.candidates[i]) == child.end()) {
+            child.push_back(parent2.candidates[i]);
+        }
+    }
+    return candidate_selection{std::move(child)};
 }

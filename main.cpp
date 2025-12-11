@@ -1,31 +1,45 @@
 //
 // Created by david on 9/18/25.
 //
+#include <chrono>
 #include <iostream>
 
+#include "GeneticAlgorithmSolver.hpp"
+#include "GeneticJobShop.h"
 #include "SimulatedAnnealingSolver.hpp"
 #include "StochasticQuadraticAssignment.h"
-#include "include/tsp_solver_c.h"
+
 
 int main()
 {
-    StochasticQuadraticAssignment quadratic_assignment{QuadraticAssignmentProblem{"els19.dat"}};
-    SimulatedAnnealingSolver<assignment, StopConditionMinChangeRate> solver{
+    const StochasticQuadraticAssignment quadratic_assignment{QuadraticAssignmentProblem{"els19.dat"}};
+    SimulatedAnnealingSolver<assignment, StopConditionMaxIterations> solver{
         std::make_unique<StochasticQuadraticAssignment>(quadratic_assignment),
-        StopConditionMinChangeRate{100.0, 2},
-        15.0
+        StopConditionMaxIterations{100*10000},
+        10.0
     };
-    auto result = solver.SimulatedAnnealing(10.0, 11.0);
+
+    auto start = std::chrono::high_resolution_clock::now();
+    const auto result = solver.SimulatedAnnealing(7.0, 11.0);
+    auto finish = std::chrono::high_resolution_clock::now();
+    auto time = std::chrono::duration_cast<std::chrono::seconds>(finish-start);
     std::cout << result.score << std::endl;
-    // GeneticJobShop job_shop{JobShopProblem::LoadFromFile("la02.txt")};
-    // auto solver = GeneticAlgorithmSolver<jobshop_schedule, StopConditionMaxIterations>(
-    //     std::make_unique<GeneticJobShop>(job_shop),
-    //     StopConditionMaxIterations{1000});
-    // const auto sol = solver.GeneticAlgorithm(
-    //     2,
-    //     100,
-    //     30,
-    //     60,
-    //     0.7f);
-    // std::cout << sol.score << std::endl;
+    std::cout << time.count() << "s" << std::endl;
+
+    const GeneticJobShop job_shop{JobShopProblem::LoadFromFile("la02.txt")};
+    auto solver_genetic = GeneticAlgorithmSolver<jobshop_schedule, StopConditionMaxIterations>(
+        std::make_unique<GeneticJobShop>(job_shop),
+        StopConditionMaxIterations{1000});
+
+    start = std::chrono::high_resolution_clock::now();
+    const auto sol = solver_genetic.GeneticAlgorithm(
+        2,
+        100,
+        30,
+        60,
+        0.7f);
+    finish = std::chrono::high_resolution_clock::now();
+    time = std::chrono::duration_cast<std::chrono::seconds>(finish-start);
+    std::cout << sol.score << std::endl;
+    std::cout << time.count() << "s" << std::endl;
 };

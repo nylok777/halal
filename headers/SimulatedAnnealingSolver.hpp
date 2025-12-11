@@ -4,7 +4,6 @@
 #ifndef HALAL_SIMULATEDANNEALINGSOLVER_H
 #define HALAL_SIMULATEDANNEALINGSOLVER_H
 #include <random>
-#include <iostream>
 #include <memory>
 #include "StopCondition.h"
 #include "SolutionCandidate.h"

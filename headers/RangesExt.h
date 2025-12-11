@@ -4,52 +4,82 @@
 
 #ifndef HALAL_RANGESEXT_H
 #define HALAL_RANGESEXT_H
+#include <algorithm>
 #include <iterator>
+#include <memory>
 #include <random>
 #include <ranges>
 
-struct sample_view_fn
+template<std::ranges::input_range R, class Gen>
+requires std::ranges::view<R> && std::uniform_random_bit_generator<std::remove_reference_t<Gen>>
+class sample_view : public std::ranges::view_interface<sample_view<R, Gen>>
 {
-    template<std::ranges::input_range R, class Gen>
-    requires std::ranges::forward_range<R> &&
-        std::uniform_random_bit_generator<std::remove_reference_t<Gen>>
-    constexpr auto operator()(R&& range, std::ranges::range_difference_t<R> n, Gen&& gen) const
-    {
-        using diff_t = std::ranges::range_difference_t<R>;
-        using iter_t = std::ranges::iterator_t<R>;
-        using distrib_t = std::uniform_int_distribution<diff_t>;
-        using param_t = distrib_t::param_type;
-        distrib_t dist{};
-        auto first = std::ranges::begin(range);
-        auto last = std::ranges::end(range);
-        std::vector<iter_t> temp;
-        if constexpr (std::ranges::forward_range<R>) {
-            diff_t i = 0;
-            auto rest = std::ranges::distance(range);
-            for (n = std::ranges::min(n, rest); n != 0; ++first) {
-                if (dist(gen, param_t(0, --rest) < n)) {
-                    temp[i++] = range;
-                    --n;
-                }
-            }
-            return std::ranges::owning_view(std::move(temp));
-        }
-        else {
-            diff_t temp_idx{};
-            //std::uniform_real_distribution<> const real_dist;
-            while (temp_idx < n) {
-                for (auto it = first; it != last; ++it) {
-                    if (dist(gen, param_t(0, n)) < n/2) temp[temp_idx++] = it;
-                }
-            }
-            return std::ranges::owning_view(std::move(temp));
-        }
-    }
-};
-namespace ranges_ext::views
-{
-inline constexpr sample_view_fn sample{};
+public:
+    sample_view() = default;
 
-}
+    sample_view(R&& range, size_t sample_count, Gen&& gen) : base(range)
+    {
+        std::vector<range_iter_t> iters;
+        for (auto it = std::ranges::begin(base); it != std::ranges::end(base); ++it) {
+            iters.push_back(it);
+        }
+
+        std::vector<range_iter_t> selected; selected.reserve(sample_count);
+        std::sample(iters.begin(), iters.end(), std::back_inserter(selected), sample_count, gen);
+        sampled = std::make_shared<std::vector<range_iter_t>>(selected);
+    }
+
+private:
+    using range_iter_t = std::ranges::iterator_t<R>;
+    using distrib_t = std::uniform_real_distribution<>;
+    using param_t = distrib_t::param_type;
+    R base;
+    std::shared_ptr<std::vector<range_iter_t>> sampled;
+
+public:
+    class iterator
+    {
+    public:
+        using iter_category = std::forward_iterator_tag;
+        using diff_t = std::vector<range_iter_t>::difference_type;
+        using value_t = std::ranges::range_value_t<R>;
+        using ref_t = std::ranges::range_reference_t<R>;
+        using vec_iter = std::vector<range_iter_t>::iterator;
+
+    private:
+        vec_iter current;
+
+    public:
+        iterator() = default;
+        explicit iterator(vec_iter it) : current(it) {}
+
+        ref_t operator*() const
+        {
+            return **current;
+        }
+
+        iterator& operator++()
+        {
+            ++current;
+            return *this;
+        }
+
+        iterator operator++(int)
+        {
+            auto past = *this;
+            ++(*this);
+            return past;
+        }
+
+        bool operator==(const iterator& other) const { return current == other.current;}
+    };
+
+    auto begin() { return iterator{sampled->begin()}; }
+
+    auto end() { return iterator{sampled->end()}; }
+};
+
+template<typename R, typename Gen>
+sample_view(R&&, size_t, Gen&&) -> sample_view<std::views::all_t<R>, std::mt19937>;
 
 #endif //HALAL_RANGESEXT_H

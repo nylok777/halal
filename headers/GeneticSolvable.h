@@ -18,4 +18,7 @@ public:
     virtual T GenerateInstance() = 0;
 };
 
+template<typename T>
+T CrossOver(const T& parent1, const T& parent2);
+
 #endif //HALAL_GENETICSOLVABLE_H

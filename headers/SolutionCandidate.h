@@ -11,14 +11,6 @@ template <typename T>
 concept Numeric = std::integral<std::remove_cvref_t<T>> ||
     std::floating_point<std::remove_cvref_t<T>>;
 
-template<typename T, typename U>
-concept Container = requires(T t)
-{
-    { std::ranges::common_range<T> };
-    { t.begin() } -> std::forward_iterator;
-    { *t.begin() } -> std::same_as<U&>;
-};
-
 template <typename T>
 concept SolutionCandidate = requires(T sol)
 {

@@ -33,6 +33,9 @@ install(TARGETS tsp_solver
 add_executable(halal
         main.cpp
         source/QuadraticAssignmentProblem.cpp
+        source/HiringProblem.cpp
+        headers/NSGAIISolver.hpp
+        source/WorkAssignment.cpp
         headers/GeneticAlgorithmSolver.hpp
         source/JobShopProblem.cpp
         source/GeneticQuadraticAssignment.cpp
@@ -46,6 +49,9 @@ add_executable(halal
         headers/StopCondition.h
         source/TravelingSalesmanProblem.cpp
         source/GeneticTravelingSalesman.cpp
+        headers/NSGAIISolver.hpp
+        headers/RangesExt.h
+        headers/GeneticHiringProblem.h
 )
 
 install()
