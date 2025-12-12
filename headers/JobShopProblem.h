@@ -4,7 +4,6 @@
 
 #ifndef HALAL_JOBSHOPPROBLEM_H
 #define HALAL_JOBSHOPPROBLEM_H
-#include <limits>
 #include <vector>
 #include <iosfwd>
 #include "DynamicMatrix.hpp"
@@ -26,6 +25,7 @@ struct operation
 
 struct jobshop_schedule
 {
+    using NumberType = float;
     DynamicMatrix<operation> rep;
     float score = 0.0f;
     bool operator<(const jobshop_schedule& other) const { return score < other.score; }
@@ -54,11 +54,6 @@ private:
     std::vector<operation> operations;
     int machines_num;
     int jobs_num;
-    int max_drought = 5;
-    float drought_radius = 100.0;
-    mutable int drought_count = 0;
-    mutable float current_makespan = std::numeric_limits<float>::max();
-    mutable float last_makespan = 0.0;
 };
 
 jobshop_schedule ActiveScheduleFromInactive(

@@ -6,10 +6,10 @@
 #include <random>
 #include <memory>
 #include "StopCondition.h"
-#include "SolutionCandidate.h"
+#include "Solution.h"
 #include "StochasticSolvable.h"
 
-template <SolutionCandidate T, StopConditionFunctor S>
+template <Solution T, StopConditionFunctor S>
 class SimulatedAnnealingSolver
 {
 public:
@@ -32,7 +32,7 @@ private:
     float temp0;
 };
 
-template <SolutionCandidate T, StopConditionFunctor S>
+template <Solution T, StopConditionFunctor S>
 T SimulatedAnnealingSolver<T, S>::SimulatedAnnealing(const float eps, const float kB)
 {
     std::random_device rnd;

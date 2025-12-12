@@ -17,11 +17,11 @@ struct assignment
     float score;
 };
 
-class QuadraticAssignmentProblem final
+class QuadraticAssignmentProblem
     : public ProblemRepresentation<std::vector<int>, float>
 {
 public:
-    QuadraticAssignmentProblem(const std::string& filename);
+    explicit QuadraticAssignmentProblem(const std::string& filename);
 
     std::vector<int> GenerateInstance() const override;
 

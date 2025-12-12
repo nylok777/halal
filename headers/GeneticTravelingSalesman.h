@@ -4,20 +4,16 @@
 
 #ifndef HALAL_GENETICTRAVELINGSALESMAN_H
 #define HALAL_GENETICTRAVELINGSALESMAN_H
-#include "GeneticSolvable.h"
+#include "Chromosome.h"
 #include "TravelingSalesmanProblem.h"
 
 
-class GeneticTravelingSalesman final : public GeneticSolvable<route>
+class GeneticTravelingSalesman final : public TravelingSalesmanProblem, public Chromosome<route>
 {
 public:
     explicit GeneticTravelingSalesman(std::vector<location>& all_locations);
-    route CrossOver(const std::vector<route>&) override;
-    void Mutate(route&) override;
-    route GetBest(const std::vector<route>&) override;
-    route GenerateInstance() override;
-private:
-    TravelingSalesmanProblem tsp;
+    route CrossOver(const std::vector<route>&) const override;
+    void Mutate(route&) const override;
 };
 
 #endif //HALAL_GENETICTRAVELINGSALESMAN_H

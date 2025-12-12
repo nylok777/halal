@@ -4,24 +4,19 @@
 
 #ifndef HALAL_GENETICJOBSHOP_H
 #define HALAL_GENETICJOBSHOP_H
-#include "GeneticSolvable.h"
+#include "Chromosome.h"
 #include "JobShopProblem.h"
 
-class GeneticJobShop final : public GeneticSolvable<jobshop_schedule>
+class GeneticJobShop final : public JobShopProblem, public Chromosome<JobShopProblem::SolutionType>
 {
 public:
-    explicit GeneticJobShop(JobShopProblem job_shop_problem);
+    explicit GeneticJobShop(int machines_num, int jobs_num, std::vector<operation> operations);
 
-    void Mutate(jobshop_schedule&) override;
+    explicit GeneticJobShop(JobShopProblem&&);
 
-    jobshop_schedule CrossOver(const std::vector<jobshop_schedule>&) override;
+    void Mutate(jobshop_schedule&) const override;
 
-    jobshop_schedule GetBest(const std::vector<jobshop_schedule>&) override;
-
-    jobshop_schedule GenerateInstance() override;
-
-private:
-    JobShopProblem job_shop_problem;
+    jobshop_schedule CrossOver(const std::vector<jobshop_schedule>&) const override;
 };
 
 #endif //HALAL_GENETICJOBSHOP_H

@@ -4,9 +4,9 @@
 
 #ifndef HALAL_STOCHASTICSOLVABLE_H
 #define HALAL_STOCHASTICSOLVABLE_H
-#include "SolutionCandidate.h"
+#include "Solution.h"
 
-template <SolutionCandidate T>
+template <Solution T>
 class StochasticSolvable
 {
 public:

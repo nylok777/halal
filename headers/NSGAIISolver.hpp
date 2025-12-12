@@ -10,129 +10,145 @@
 #include <set>
 #include <unordered_map>
 
-#include "GeneticSolvable.h"
+#include "Chromosome.h"
 #include "ProblemRepresentation.h"
-#include "SolutionCandidate.h"
+#include "RangesExt.h"
+#include "Solution.h"
 #include "StopCondition.h"
 
+namespace ranges = std::ranges;
 
-template<HasParetoRank T, StopConditionFunctor S, typename P, Numeric N>
-requires std::derived_from<P, ParetoOptimizationProblem<T, N>>
+template<ranges::input_range R>
+requires ranges::forward_range<R> && ParetoSolution<ranges::range_value_t<R>>
+void NonDominatedSort(R&& elements)
+{
+    using iter = ranges::iterator_t<R>;
+    std::vector<iter> pareto_front;
+    std::unordered_map<iter, std::vector<iter>> dominated_elements;
+    std::ranges::for_each(elements, [&dominated_elements](auto& x){dominated_elements.emplace(&x, {});});
+    for (auto p = ranges::begin(elements); p != ranges::end(elements); ++p) {
+        auto others = std::views::filter(elements ,[&p](auto& x){return &x != &p;});
+        for (auto q = ranges::begin(others); q != ranges::end(others); ++q) {
+            if (IsParetoDominatedBy(p, q)) {
+                ++p.dominated_by;
+                dominated_elements.at(q).push_back(p);
+            }
+        }
+        if (p.dominated_by == 0) {
+            pareto_front.push_back(p);
+        }
+    }
+    auto pfi = 1;
+    while (pareto_front.size() != 0) {
+        std::vector<iter> F_next;
+        for (auto p = ranges::begin(pareto_front); p != ranges::end(pareto_front); ++p) {
+            p->pareto_rank = pfi;
+            for (auto q = std::begin(dominated_elements.at(p)); q != std::end(dominated_elements.at(p)); ++q) {
+                --q->dominated_by;
+                if (q->dominated_by == 0) {
+                    F_next.push_back(q);
+                }
+            }
+        }
+        ++pfi;
+        pareto_front = F_next;
+    }
+}
+
+template<ranges::forward_range R, ranges::forward_range RG>
+requires ParetoSolution<ranges::range_value_t<R>> && std::is_function_v<ranges::range_value_t<RG>>
+auto CrowdingDistance(R&& elements, RG&& objectives) -> std::vector<std::pair<ranges::iterator_t<R>, typename ranges::range_value_t<R>::NumberType>>
+{
+    using numeric_type = ranges::range_value_t<R>::NumberType;
+    std::vector<std::pair<ranges::iterator_t<R>, numeric_type>> crowding_distances;
+    for (auto it = std::ranges::begin(elements); it != ranges::end(elements); ++it) {
+        crowding_distances.emplace_back(std::make_pair(it, numeric_type{0}));
+    }
+    for (auto func = ranges::begin(objectives); func != ranges::end(objectives); ++func) {
+        ranges::sort(crowding_distances, [&func](const auto& lhs, const auto& rhs)
+        {
+            return func(lhs->first) < func(rhs->first);
+        });
+        auto [g_min, g_max] = ranges::minmax(ranges::views::transform(crowding_distances, [&func](const auto& x)
+        {
+            return func(x->first);
+        }));
+        ranges::begin(crowding_distances)->second = std::numeric_limits<numeric_type>::infinity();
+        ranges::rbegin(crowding_distances)->second = std::numeric_limits<numeric_type>::infinity();
+        for (auto it = ranges::begin(crowding_distances) + 1; it != ranges::end(crowding_distances) - 1; ++it) {
+            it->second += (func((it+1)->first) - func((it-1)->first)) / (g_max - g_min);
+        }
+    }
+    return crowding_distances;
+}
+
+template<ranges::forward_range R1, ranges::forward_range R2, ranges::forward_range RG>
+requires ParetoSolution<ranges::range_value_t<R1>> && ParetoSolution<ranges::range_value_t<R2>> &&
+    std::same_as<ranges::range_value_t<R1>, ranges::range_value_t<R2>>
+auto NSGAIISelection(R1&& population, R2&& next_gen, RG&& objectives, const int n_best) -> std::set<ranges::range_value_t<R1>>
+{
+    std::set<ranges::range_value_t<R1>> selected{};
+    auto all_elements = concat_view(population, next_gen);
+    NonDominatedSort(all_elements);
+    auto pfi = 1;
+    auto n_selected = selected.size();
+    while (n_selected < n_best) {
+        auto pareto_front = all_elements | std::views::filter([pfi](auto e) { return e->pareto_rank == pfi; });
+        if (ranges::size(pareto_front) + ranges::size(selected) <= n_best) {
+            selected.insert(pareto_front.begin(), pareto_front.end());
+            n_selected = selected.size();
+        } else {
+            auto elems_with_dist = CrowdingDistance(pareto_front, objectives);
+            ranges::sort(elems_with_dist, [](const auto& p, const auto& q) { return p.second < q.second; });
+            for (auto i = 0; i < elems_with_dist.size(); ++i) {
+                selected.insert(elems_with_dist.at(i).first);
+            }
+        }
+        ++pfi;
+    }
+    return selected;
+}
+
+template<ParetoSolution T, StopConditionFunctor S, class P>
+requires std::derived_from<P, ParetoOptimizationProblem<T, typename T::NumberType>> &&
+    std::derived_from<P, Chromosome<T>>
 class NSGAIISolver
 {
 public:
-    using t_with_distance = std::pair<T, N>;
-    explicit NSGAIISolver(P&& problem, const int parent_pool_size, const int new_gen_size)
-        : problem(std::make_unique<P>(problem)), parent_pool_size(parent_pool_size), new_gen_size(new_gen_size) {}
+    explicit NSGAIISolver(S&& stop_condition) : stop_condition(stop_condition) {}
 
-    std::vector<T> operator()(S& stop_condition, const int n_best)
+    std::vector<T> operator()(
+        P& problem,
+        const int parent_pool_size,
+        const int n_best,
+        const int n_offspring,
+        const float mutation_rate)
     {
+        using iter_t = std::set<T>::const_iterator;
         std::set<T> population;
         std::set<T> new_gen;
         std::set<T> best;
+        std::mt19937 gen{std::random_device{}()};
         std::ranges::generate(std::back_inserter(population), problem->GenerateInstance());
         while (StopCondition(stop_condition, 0.0f)) {
-            auto selected_population = Selection(population, new_gen, n_best);
-            std::ranges::copy_if(selected_population, std::back_inserter(best), [](const auto& p){return p.pareto_rank == 1;});
-            new_gen = MakeNewPopulation(population);
+            population = NSGAIISelection(population, new_gen, n_best);
+            std::ranges::copy_if(population, std::back_inserter(best), [](const auto& p){return p.pareto_rank == 1;});
+            std::vector<iter_t> potential_parents; potential_parents.reserve(parent_pool_size);
+            ranges::sample(population, potential_parents, parent_pool_size, gen);
+            std::uniform_real_distribution<float> dist{0.0f, 1.0f};
+            for (int i = 0; i < n_offspring; ++i) {
+                std::vector<T> parents;
+                ranges::sample(population, parents, 2, gen);
+                auto child = problem.CrossOver(parents);
+                if (dist(gen) < mutation_rate)
+                    problem.Mutate(child);
+                new_gen.insert(child);
+            }
         }
         return best;
     }
 private:
-    std::unique_ptr<P> problem;
-    int parent_pool_size;
-    int new_gen_size;
-
-    std::set<T> MakeNewPopulation(std::set<T>& population)
-    {
-        std::vector<T> parents;
-        std::set<T> children;
-        std::ranges::sample(population, std::back_inserter(parents), parent_pool_size, std::mt19937{std::random_device{}()});
-        for (int i = 1; i < new_gen_size - 1; ++i) {
-            if (i < parents.size()) {
-                children.emplace(CrossOver(parents.at(i-1), parents.at(i)));
-            }
-            else {
-                children.emplace(CrossOver(parents.front(), parents.back()));
-            }
-        }
-        return children;
-    }
-
-    std::set<t_with_distance> CrowdingDistance(std::set<T>& F)
-    {
-        std::vector<t_with_distance> D; D.reserve(F.size());
-        std::ranges::views::transform(F, std::back_inserter(D),[](auto& x){ return t_with_distance{x, 0}; });
-        for (auto& func : problem->GetObjectives()) {
-            std::vector<N> func_results; func_results.reserve(D.size());
-            std::ranges::transform(D, std::back_inserter(func_results), [&func](auto& p){return func(p.first);});
-            std::ranges::sort(D, [&func](auto& p, auto& q){return func(p.first) < func(q.first);});
-            D.at(0).second, D.back().second = std::numeric_limits<N>::max();
-            for (int i = 1; i < D.size() - 1; ++i) {
-                D.at(i).second += (func(D.at(i+1).first) - func(D.at(i-1).first)) /
-                    (std::ranges::max(func_results) - std::ranges::min(func_results));
-            }
-        }
-        return std::set<t_with_distance>{D.begin(), D.end()};
-    }
-
-    std::set<T> Selection(std::set<T>& population, std::set<T>& new_gen, const int n_best)
-    {
-        std::set<T> best;
-        std::vector<T> R; R.reserve(population.size() + new_gen.size());
-        std::ranges::set_union(population, new_gen, std::back_inserter(R));
-        NonDominatedSort(R);
-        auto pfi = 1;
-        while (best.size() < n_best) {
-            std::vector<T> F;
-            std::ranges::copy_if(R, std::back_inserter(F), [pfi](const auto& p){return p.pareto_rank == pfi;});
-            if (best.size() + F.size() <= n_best) {
-                std::ranges::copy(F, std::back_inserter(best));
-            }
-            else {
-                auto with_dist = CrowdingDistance(F);
-                std::ranges::sort(with_dist, [](const auto& a, const auto& b){return a.second < b.second;});
-                for (int i = 0; i < n_best - best.size(); ++i) {
-                    best.emplace(with_dist.at(i).first);
-                }
-            }
-            ++pfi;
-        }
-        return best;
-    }
-
-    void NonDominatedSort(std::vector<T>& R)
-    {
-        std::vector<const T*> F;
-        std::unordered_map<const T*, std::vector<const T*>> S_;
-        std::ranges::for_each(R, [&S_](auto& x){S_.emplace(&x, {});});
-        for (auto & p : R) {
-            for (auto & q : R | std::views::filter([&p](auto& x){return &x != &p;})) {
-                if (problem->IsParetoDominatedBy(p, q)) {
-                    ++p.dominated_by;
-                    S_.at(&q).push_back(&p);
-                }
-            }
-            if (p.dominated_by == 0) {
-                F.push_back(&p);
-            }
-        }
-        auto pfi = 1;
-        while (F.size() != 0) {
-            std::vector<const T*> F_next;
-            for (auto p : F) {
-                p->pareto_rank = pfi;
-                for (auto q : S_.at(p)) {
-                    --q->dominated_by;
-                    if (q->dominated_by == 0) {
-                        F_next.push_back(q);
-                    }
-                }
-            }
-            ++pfi;
-            F = F_next;
-        }
-    }
+    S stop_condition;
 };
 
 #endif //HALAL_NSGAIISOLVER_HPP

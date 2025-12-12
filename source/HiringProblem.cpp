@@ -2,7 +2,7 @@
 // Created by david on 12/10/25.
 //
 #include "HiringProblem.h"
-#include "GeneticSolvable.h"
+#include "Chromosome.h"
 
 #include <algorithm>
 #include <random>
@@ -67,4 +67,12 @@ candidate_selection CrossOver(const candidate_selection& parent1, const candidat
         }
     }
     return candidate_selection{std::move(child)};
+}
+
+template<>
+bool IsParetoDominatedBy(const candidate_selection& a, const candidate_selection& b)
+{
+    auto funcs
+    return !(avgQuality(a.candidates) >= avgQuality(b.candidates) ||
+        sumSalary(a.candidates) <= sumSalary(b.candidates));
 }

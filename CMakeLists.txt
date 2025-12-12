@@ -8,7 +8,7 @@ add_library(tsp_solver SHARED
         source/TravelingSalesmanProblem.cpp
         source/GeneticTravelingSalesman.cpp
         source/StopCondition.cpp
-        headers/SolutionCandidate.h
+        headers/Solution.h
         headers/GeneticAlgorithmSolver.hpp
         tsp_solver.cpp
 )
@@ -42,7 +42,7 @@ add_executable(halal
         source/GeneticJobShop.cpp
         headers/DynamicMatrix.hpp
         headers/SymmetricMatrix.hpp
-        headers/SolutionCandidate.h
+        headers/Solution.h
         source/StochasticQuadraticAssignment.cpp
         headers/SimulatedAnnealingSolver.hpp
         source/StopCondition.cpp
@@ -52,6 +52,7 @@ add_executable(halal
         headers/NSGAIISolver.hpp
         headers/RangesExt.h
         headers/GeneticHiringProblem.h
+        source/GeneticHiringProblem.cpp
 )
 
 install()

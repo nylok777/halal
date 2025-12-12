@@ -9,6 +9,7 @@
 
 struct candidate_selection
 {
+    using ObjectiveReturnType = float;
     std::vector<int> candidates;
     int pareto_rank;
     int dominated_by;

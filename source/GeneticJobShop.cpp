@@ -8,30 +8,33 @@
 #include <ranges>
 #include <utility>
 
-GeneticJobShop::GeneticJobShop(JobShopProblem job_shop_problem) : job_shop_problem(std::move(job_shop_problem)) {}
+GeneticJobShop::GeneticJobShop(const int machines_num, const int jobs_num, std::vector<operation> operations)
+    : JobShopProblem(machines_num, jobs_num, operations) {}
 
-void GeneticJobShop::Mutate(jobshop_schedule& child)
+GeneticJobShop::GeneticJobShop(JobShopProblem&& problem) : JobShopProblem(std::move(problem)) {}
+
+void GeneticJobShop::Mutate(jobshop_schedule& child) const
 {
     std::mt19937 gen{std::random_device{}()};
-    std::uniform_int_distribution<> dist{0, job_shop_problem.NumberOfMachines() - 1};
+    std::uniform_int_distribution<> dist{0, NumberOfMachines() - 1};
     const auto machine = dist(gen);
     dist = std::uniform_int_distribution<>{0, child.rep.SizeOfRow(machine) - 1};
     std::swap(child.rep.At(machine, dist(gen)), child.rep.At(machine, dist(gen)));
-    child.score = job_shop_problem.Objective(child);
+    child.score = Objective(child);
 }
 
-jobshop_schedule GeneticJobShop::CrossOver(const std::vector<jobshop_schedule>& parents)
+jobshop_schedule GeneticJobShop::CrossOver(const std::vector<jobshop_schedule>& parents) const
 {
     std::mt19937 gen{std::random_device{}()};
-    std::uniform_int_distribution<int> job_dist{1, job_shop_problem.NumberOfJobs()};
+    std::uniform_int_distribution<int> job_dist{1, NumberOfJobs()};
 
     std::vector<int> preserved_jobs;
-    preserved_jobs.reserve(job_shop_problem.NumberOfJobs() / 2);
+    preserved_jobs.reserve(NumberOfJobs() / 2);
 
-    for (int i = 0; i < job_shop_problem.NumberOfJobs() / 2; ++i) { preserved_jobs.push_back(job_dist(gen)); }
+    for (int i = 0; i < NumberOfJobs() / 2; ++i) { preserved_jobs.push_back(job_dist(gen)); }
 
-    DynamicMatrix<operation> child{job_shop_problem.NumberOfMachines()};
-    child.Resize(job_shop_problem.NumberOfJobs());
+    DynamicMatrix<operation> child{NumberOfMachines()};
+    child.Resize(NumberOfJobs());
     auto parent = parents.begin();
     for (const auto job_i : preserved_jobs) {
         std::vector<std::pair<int, operation>> job_i_ops;
@@ -60,21 +63,10 @@ jobshop_schedule GeneticJobShop::CrossOver(const std::vector<jobshop_schedule>& 
         }
     }
     auto active_child = ActiveScheduleFromInactive(
-        job_shop_problem.NumberOfOperations(),
-        job_shop_problem.NumberOfJobs(),
-        job_shop_problem.NumberOfMachines(),
-        {job_shop_problem.GetOperations().begin(), job_shop_problem.GetOperations().end()},
+        NumberOfOperations(),
+        NumberOfJobs(),
+        NumberOfMachines(),
+        {GetOperations().begin(), GetOperations().end()},
         child);
     return active_child;
-}
-
-jobshop_schedule GeneticJobShop::GetBest(const std::vector<jobshop_schedule>& schedules)
-{
-    return *std::ranges::min_element(schedules,
-                                     [](const auto& item1, const auto& item2) { return item1.score < item2.score; });
-}
-
-jobshop_schedule GeneticJobShop::GenerateInstance()
-{
-    return job_shop_problem.GenerateInstance();
 }

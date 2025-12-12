@@ -2,15 +2,14 @@
 // Created by david on 10/5/25.
 //
 
-#include "../headers/GeneticQuadraticAssignment.h"
+#include "GeneticQuadraticAssignment.h"
 
 #include <random>
 #include <unordered_set>
 
-GeneticQuadraticAssignment::GeneticQuadraticAssignment(QuadraticAssignmentProblem& quadratic_assignment_problem)
-    : quadratic_assignment_problem(std::move(quadratic_assignment_problem)) {}
+GeneticQuadraticAssignment::GeneticQuadraticAssignment(const std::string& filename) : QuadraticAssignmentProblem(filename) {}
 
-assignment GeneticQuadraticAssignment::CrossOver(const std::vector<assignment>& parents)
+assignment GeneticQuadraticAssignment::CrossOver(const std::vector<assignment>& parents) const
 {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
@@ -30,29 +29,15 @@ assignment GeneticQuadraticAssignment::CrossOver(const std::vector<assignment>& 
             }
         }
     }
-    return assignment{child, quadratic_assignment_problem.Objective(child)};
+    return assignment{child, Objective(child)};
 }
 
-void GeneticQuadraticAssignment::Mutate(assignment& child)
+void GeneticQuadraticAssignment::Mutate(assignment& child) const
 {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> dist(0, static_cast<int>(child.rep.size()) - 1);
 
     std::swap(child.rep[dist(gen)], child.rep[dist(gen)]);
-    child.score = quadratic_assignment_problem.Objective(child.rep);
-}
-
-assignment GeneticQuadraticAssignment::GetBest(const std::vector<assignment>& population)
-{
-    const auto best = std::ranges::min_element(population,
-                                               [](const auto& lhs, const auto& rhs) { return lhs.score < rhs.score; });
-    return *best;
-}
-
-assignment GeneticQuadraticAssignment::GenerateInstance()
-{
-    auto instance = quadratic_assignment_problem.GenerateInstance();
-    const auto score = quadratic_assignment_problem.Objective(instance);
-    return assignment{std::move(instance), score};
+    child.score = Objective(child.rep);
 }

@@ -26,13 +26,16 @@ int main()
     std::cout << result.score << std::endl;
     std::cout << time.count() << "s" << std::endl;
 
-    const GeneticJobShop job_shop{JobShopProblem::LoadFromFile("la02.txt")};
-    auto solver_genetic = GeneticAlgorithmSolver<jobshop_schedule, StopConditionMaxIterations>(
-        std::make_unique<GeneticJobShop>(job_shop),
+
+
+    /*
+    const GeneticJobShop job_shop{GeneticJobShop::LoadFromFile("la02.txt")};
+    auto solver_genetic = GeneticAlgorithmSolver<jobshop_schedule, StopConditionMaxIterations, GeneticJobShop>(
         StopConditionMaxIterations{1000});
 
     start = std::chrono::high_resolution_clock::now();
-    const auto sol = solver_genetic.GeneticAlgorithm(
+    const auto sol = solver_genetic(
+        job_shop,
         2,
         100,
         30,
@@ -42,4 +45,5 @@ int main()
     time = std::chrono::duration_cast<std::chrono::seconds>(finish-start);
     std::cout << sol.score << std::endl;
     std::cout << time.count() << "s" << std::endl;
+*/
 };

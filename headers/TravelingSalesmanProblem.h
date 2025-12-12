@@ -24,7 +24,7 @@ struct route
     bool operator<(const route& other) const { return score < other.score; }
 };
 
-class TravelingSalesmanProblem final : public ProblemRepresentation<route, double>
+class TravelingSalesmanProblem : public ProblemRepresentation<route, double>
 {
 public:
     explicit TravelingSalesmanProblem(std::vector<location>& all_locations);

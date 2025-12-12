@@ -4,6 +4,7 @@
 
 #ifndef HALAL_STOPCONDITION_H
 #define HALAL_STOPCONDITION_H
+#include <concepts>
 
 template <typename T, typename = void>
 struct is_stop_condition : std::false_type {};
