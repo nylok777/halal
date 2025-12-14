@@ -58,7 +58,7 @@ auto QuadraticAssignmentProblem::GenerateInstance() const -> assignment
     return assignment{std::move(bijection)};
 }
 
-float QuadraticAssignmentProblem::Objective(const assignment& p) const
+auto QuadraticAssignmentProblem::Objective(const assignment& p) const -> float
 {
     float sum = 0.0;
     for (int i = 0; i < n; ++i) {
@@ -70,7 +70,7 @@ float QuadraticAssignmentProblem::Objective(const assignment& p) const
 }
 
 
-int QuadraticAssignmentProblem::ProblemSize() const
+auto QuadraticAssignmentProblem::ProblemSize() const -> int
 {
     return n;
 }

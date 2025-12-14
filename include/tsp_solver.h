@@ -7,6 +7,6 @@
 #include <vector>
 #include "TravelingSalesmanProblem.h"
 
-std::vector<location> SolveTspInstance(std::vector<location>& all_delivery_points);
+auto SolveTspInstance(std::vector<location>& all_delivery_points) -> std::vector<location>;
 
 #endif //HALAL_TSP_SOLVER_H

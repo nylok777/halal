@@ -11,6 +11,6 @@ class StochasticSolvable
 {
 public:
     virtual ~StochasticSolvable() = default;
-    virtual T GenerateNeighbour(const T&, float eps) const = 0;
+    virtual auto GenerateNeighbour(const T&, float eps) const -> T = 0;
 };
 #endif //HALAL_STOCHASTICSOLVABLE_H

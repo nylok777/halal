@@ -20,7 +20,7 @@ concept StopConditionFunctor =
     };
 
 template <StopConditionFunctor Condition>
-bool StopCondition(Condition& cond, float score)
+auto StopCondition(Condition& cond, float score) -> bool
 {
     if constexpr (requires { cond(score); }) {
         return cond(score);
@@ -39,7 +39,7 @@ public:
     using stop_condition_tag = ::stop_condition_tag;
 
     explicit StopConditionMinChangeRate(const float min_change_rate, const int max_fails);
-    bool operator()(const float score);
+    auto operator()(const float score) -> bool;
 
 private:
     float min_change_rate;
@@ -54,7 +54,7 @@ public:
     using stop_condition_tag = ::stop_condition_tag;
 
     explicit StopConditionMaxIterations(const int max_iterations);
-    bool operator()();
+    auto operator()() -> bool;
 
 private:
     int max_iters;

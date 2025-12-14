@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include <utility>
 
-assignment StochasticQuadraticAssignment::GenerateNeighbour(const assignment& p, const float eps) const
+auto StochasticQuadraticAssignment::GenerateNeighbour(const assignment& p, const float eps) const -> assignment
 {
     std::random_device rnd;
     std::mt19937 gen{rnd()};

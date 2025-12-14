@@ -42,12 +42,12 @@ auto HiringProblem::GenerateInstance() const -> candidate_selection
     return candidate_selection{std::move(people)};
 }
 
-float HiringProblem::SumSalary(const candidate_selection& selection) const
+auto HiringProblem::SumSalary(const candidate_selection& selection) const -> float
 {
     return sumSalary(selection.candidates);
 }
 
-float HiringProblem::AvgQuality(const candidate_selection& selection) const
+auto HiringProblem::AvgQuality(const candidate_selection& selection) const -> float
 {
     return avgQuality(selection.candidates);
 }
@@ -55,8 +55,14 @@ float HiringProblem::AvgQuality(const candidate_selection& selection) const
 auto HiringProblem::GetObjectives() const -> std::vector<std::function<float(const candidate_selection&)>>
 {
     using std::placeholders::_1;
-    std::function<float(const candidate_selection&)> sum_salary = std::bind(&HiringProblem::SumSalary, this, _1);
-    std::function<float(const candidate_selection&)> avg_quality = std::bind(&HiringProblem::AvgQuality, this, _1);
+    std::function<float(const candidate_selection&)> sum_salary = [this]<typename T0>(T0 && PH1) -> auto
+    {
+        return SumSalary(std::forward<T0>(PH1));
+    };
+    std::function<float(const candidate_selection&)> avg_quality = [this]<typename T0>(T0 && PH1) -> auto
+    {
+        return AvgQuality(std::forward<T0>(PH1));
+    };
     return {std::move(sum_salary), std::move(avg_quality)};
 }
 

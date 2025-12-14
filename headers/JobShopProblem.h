@@ -17,10 +17,10 @@ struct operation
     int precedence = 0;
     int machine_id = 0;
     float time = 0.0;
-    friend bool operator<(const operation& op1, const operation& op2);
-    friend bool operator>(const operation& op1, const operation& op2);
-    friend bool operator==(const operation& op1, const operation& op2);
-    friend std::ostream& operator<<(std::ostream& stream, const operation& operation);
+    friend auto operator<(const operation& op1, const operation& op2) -> bool;
+    friend auto operator>(const operation& op1, const operation& op2) -> bool;
+    friend auto operator==(const operation& op1, const operation& op2) -> bool;
+    friend auto operator<<(std::ostream& stream, const operation& operation) -> std::ostream&;
 };
 
 struct jobshop_schedule
@@ -28,7 +28,7 @@ struct jobshop_schedule
     using NumberType = float;
     DynamicMatrix<operation> rep;
     float score = 0.0f;
-    bool operator<(const jobshop_schedule& other) const { return score < other.score; }
+    auto operator<(const jobshop_schedule& other) const -> bool { return score < other.score; }
 };
 
 class JobShopProblem : public OptimizationProblem<jobshop_schedule, float>
@@ -36,19 +36,19 @@ class JobShopProblem : public OptimizationProblem<jobshop_schedule, float>
 public:
     JobShopProblem(int machines_num, int jobs_num, std::vector<operation>& ops);
 
-    static JobShopProblem LoadFromFile(const std::string& path);
+    static auto LoadFromFile(const std::string& path) -> JobShopProblem;
 
-    [[nodiscard]] float Objective(const jobshop_schedule&) const override;
+    [[nodiscard]] auto Objective(const jobshop_schedule&) const -> float override;
 
-    [[nodiscard]] jobshop_schedule GenerateInstance() const override;
+    [[nodiscard]] auto GenerateInstance() const -> jobshop_schedule override;
 
-    const std::vector<operation>& GetOperations() const;
+    auto GetOperations() const -> const std::vector<operation>&;
 
-    int NumberOfMachines() const;
+    auto NumberOfMachines() const -> int;
 
-    int NumberOfOperations() const;
+    auto NumberOfOperations() const -> int;
 
-    int NumberOfJobs() const;
+    auto NumberOfJobs() const -> int;
 
 private:
     std::vector<operation> operations;
@@ -56,11 +56,11 @@ private:
     int jobs_num;
 };
 
-jobshop_schedule ActiveScheduleFromInactive(
+auto ActiveScheduleFromInactive(
     const int n_operations,
     const int n_jobs,
     const int n_machines,
     std::vector<operation>&& operations,
-    DynamicMatrix<operation>& schedule);
+    DynamicMatrix<operation>& schedule) -> jobshop_schedule;
 
 #endif //HALAL_JOBSHOPPROBLEM_H

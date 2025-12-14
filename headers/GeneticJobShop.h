@@ -16,7 +16,7 @@ public:
 
     void Mutate(jobshop_schedule&) const override;
 
-    jobshop_schedule CrossOver(const std::vector<jobshop_schedule>&) const override;
+    auto CrossOver(const std::vector<jobshop_schedule>&) const -> jobshop_schedule override;
 };
 
 #endif //HALAL_GENETICJOBSHOP_H

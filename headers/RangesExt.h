@@ -58,29 +58,29 @@ public:
         iterator() = default;
         explicit iterator(vec_iter it) : current(it) {}
 
-        reference operator*() const { return **current; }
+        auto operator*() const -> reference { return **current; }
 
-        pointer operator->() const { return current; }
+        auto operator->() const -> pointer { return current; }
 
-        reference operator*() { return **current; }
+        auto operator*() -> reference { return **current; }
 
-        pointer operator->() { return current; }
+        auto operator->() -> pointer { return current; }
 
-        iterator& operator++()
+        auto operator++() -> iterator&
         {
             ++current;
             return *this;
         }
 
-        iterator operator++(int)
+        auto operator++(int) -> iterator
         {
             auto past = *this;
             ++(*this);
             return past;
         }
 
-        bool operator==(const iterator& other) const { return current == other.current;}
-        bool operator<(const iterator& other) const { return current < other.current; }
+        auto operator==(const iterator& other) const -> bool { return current == other.current;}
+        auto operator<(const iterator& other) const -> bool { return current < other.current; }
     };
 
     auto begin() { return iterator{sampled->begin()}; }

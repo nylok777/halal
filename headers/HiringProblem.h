@@ -13,8 +13,8 @@ struct candidate_selection
     std::vector<int> candidates{};
     int pareto_rank = 0;
     int dominated_by = 0;
-    bool operator<(const candidate_selection& other) const;
-    bool operator==(const candidate_selection& other) const;
+    auto operator<(const candidate_selection& other) const -> bool;
+    auto operator==(const candidate_selection& other) const -> bool;
 };
 
 class HiringProblem : public WorkAssignmentProblem, public ParetoOptimizationProblem<candidate_selection, float>
@@ -25,8 +25,8 @@ public:
     [[nodiscard]] auto GenerateInstance() const -> candidate_selection override;
     [[nodiscard]] auto GetObjectives() const -> std::vector<std::function<float(const candidate_selection&)>> override;
 protected:
-    float SumSalary(const candidate_selection& selection) const;
-    float AvgQuality(const candidate_selection& selection) const;
+    auto SumSalary(const candidate_selection& selection) const -> float;
+    auto AvgQuality(const candidate_selection& selection) const -> float;
     int n_people_to_hire;
 };
 

@@ -9,7 +9,7 @@
 
 #include <memory>
 
-std::vector<location> SolveTspInstance(std::vector<location>& all_delivery_points)
+auto SolveTspInstance(std::vector<location>& all_delivery_points) -> std::vector<location>
 {
     const auto tsp = std::make_shared<GeneticTravelingSalesman>(all_delivery_points);
     StopConditionMaxIterations stop_cond{200};

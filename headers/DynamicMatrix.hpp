@@ -160,7 +160,7 @@ public:
 };
 
 template <typename T>
-std::ostream& operator<<(std::ostream& stream, const DynamicMatrix<T>& matrix)
+auto operator<<(std::ostream& stream, const DynamicMatrix<T>& matrix) -> std::ostream&
 {
     for (int i = 0; i < matrix.n_rows; ++i) {
         for (const auto& row = matrix.Row(i); const auto& item : row) {

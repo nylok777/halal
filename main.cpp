@@ -14,7 +14,7 @@
 void RunQuadraticAssignment()
 {
     const auto quadratic_assignment = std::make_shared<StochasticQuadraticAssignment>("els19.dat");
-    auto stop_cond = StopConditionMaxIterations{100*1000};
+    auto stop_cond = StopConditionMaxIterations{1000*1000};
     BoltzmannScheduleTemperature temperature{1000.0f};
     const auto start = std::chrono::high_resolution_clock::now();
     const auto [rep, score] = SimulatedAnnealing(
@@ -32,7 +32,6 @@ void RunQuadraticAssignment()
 
 void RunJobshopScheduling()
 {
-    //const GeneticJobShop job_shop{GeneticJobShop::LoadFromFile("la02.txt")};
     const auto job_shop = std::make_shared<GeneticJobShop>(GeneticJobShop::LoadFromFile("la02.txt"));
     StopConditionMaxIterations stop_condition{1000};
     const auto start = std::chrono::high_resolution_clock::now();
@@ -65,19 +64,24 @@ auto RunWorkAssignment()
         50,
         30,
         comparator,
-        3,
+        2,
         0.6f,
         stop_cond);
 
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto time = std::chrono::duration_cast<std::chrono::seconds>(finish-start);
-    std::cout << res.size() << std::endl;
+    auto objectives = hiring_problem->GetObjectives();
+    std::ranges::for_each(std::ranges::views::take(res, 5), [&objectives](const auto& sol) -> void
+    {
+        std::cout << "Total salary: " << objectives.front()(sol) << '\n' <<
+            "Average quality: " << objectives.back()(sol) << '\n' << std::endl;
+    });
     std::cout << time << std::endl;
 }
 
-int main()
+auto main() -> int
 {
-    //RunQuadraticAssignment();
-    //RunJobshopScheduling();
+    RunQuadraticAssignment();
+    RunJobshopScheduling();
     RunWorkAssignment();
 };

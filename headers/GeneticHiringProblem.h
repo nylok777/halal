@@ -11,7 +11,7 @@ class GeneticHiringProblem : public HiringProblem, public Chromosome<HiringProbl
 {
 public:
     GeneticHiringProblem(const std::string& filename, const int n_people_to_hire);
-    candidate_selection CrossOver(const std::vector<candidate_selection>&) const override;
+    auto CrossOver(const std::vector<candidate_selection>&) const -> candidate_selection override;
     void Mutate(candidate_selection&) const override;
 };
 

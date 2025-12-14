@@ -18,7 +18,7 @@ operation::operation(const int job_id, const int precedence, const int machine_i
       machine_id(machine_id),
       time(time) {}
 
-bool operator<(const operation& op1, const operation& op2)
+auto operator<(const operation& op1, const operation& op2) -> bool
 {
     if (op1.precedence != op2.precedence) return op1.precedence < op2.precedence;
     if (op1.job_id != op2.job_id) return op1.job_id < op2.job_id;
@@ -27,11 +27,11 @@ bool operator<(const operation& op1, const operation& op2)
     return false;
 }
 
-bool operator>(const operation& op1, const operation& op2) { return !(op1 < op2); }
+auto operator>(const operation& op1, const operation& op2) -> bool { return !(op1 < op2); }
 
-bool operator==(const operation& op1, const operation& op2) { return !(op2 < op1) && !(op1 < op2); }
+auto operator==(const operation& op1, const operation& op2) -> bool { return !(op2 < op1) && !(op1 < op2); }
 
-std::ostream& operator<<(std::ostream& stream, const operation& operation)
+auto operator<<(std::ostream& stream, const operation& operation) -> std::ostream&
 {
     return stream << 'J' << operation.job_id << "-" << operation.precedence << "M" << operation.machine_id;
 }
@@ -48,23 +48,23 @@ class GifflerThompson
 public:
     explicit GifflerThompson(const int n_jobs, const int n_machines);
 
-    jobshop_schedule operator()(
+    auto operator()(
         const int n_operations,
         const int n_machines,
-        std::vector<operation>&& unscheduled_operations);
+        std::vector<operation>&& unscheduled_operations) -> jobshop_schedule;
 
-    jobshop_schedule operator()(
+    auto operator()(
         const int n_operations,
         std::vector<operation>&& unscheduled_operations,
-        DynamicMatrix<operation>& inactive_schedule);
+        DynamicMatrix<operation>& inactive_schedule) -> jobshop_schedule;
 
 private:
-    operation_with_times SelectAndUpdate(const std::vector<operation_with_times>& conflict);
+    auto SelectAndUpdate(const std::vector<operation_with_times>& conflict) -> operation_with_times;
 
-    static std::vector<operation_with_times> CreateConflictSet(const std::vector<operation_with_times>& ops_times);
+    static auto CreateConflictSet(const std::vector<operation_with_times>& ops_times) -> std::vector<operation_with_times>;
 
-    std::vector<operation_with_times> CalculateStartAndFinishForOperations(
-        const std::vector<operation>& unscheduled_operations);
+    auto CalculateStartAndFinishForOperations(
+        const std::vector<operation>& unscheduled_operations) -> std::vector<operation_with_times>;
 
     std::vector<float> machine_available_time;
     std::vector<float> job_ready_time;
@@ -76,10 +76,10 @@ GifflerThompson::GifflerThompson(const int n_jobs, const int n_machines)
       job_ready_time(std::vector(n_jobs, 0.0f)),
       jobs_progress(std::vector(n_jobs, 1)) {}
 
-jobshop_schedule GifflerThompson::operator()(
+auto GifflerThompson::operator()(
     const int n_operations,
     const int n_machines,
-    std::vector<operation>&& unscheduled_operations)
+    std::vector<operation>&& unscheduled_operations) -> jobshop_schedule
 {
     DynamicMatrix < operation > schedule{n_machines};
 
@@ -89,17 +89,17 @@ jobshop_schedule GifflerThompson::operator()(
         schedule.PushBack(to_schedule.op->machine_id - 1, *to_schedule.op);
 
         std::erase_if(unscheduled_operations, [&to_schedule](const auto& op)
-        {
+        -> auto {
             return *to_schedule.op == op;
         });
     }
     return jobshop_schedule{std::move(schedule), *std::ranges::max_element(job_ready_time)};
 }
 
-jobshop_schedule GifflerThompson::operator()(
+auto GifflerThompson::operator()(
     const int n_operations,
     std::vector<operation>&& unscheduled_operations,
-    DynamicMatrix<operation>& inactive_schedule)
+    DynamicMatrix<operation>& inactive_schedule) -> jobshop_schedule
 {
     std::mt19937 gen{std::random_device{}()};
     for (int i = 0; i < n_operations; ++i) {
@@ -107,23 +107,23 @@ jobshop_schedule GifflerThompson::operator()(
             CalculateStartAndFinishForOperations(unscheduled_operations));
         auto M_machine = conflict.front().op->machine_id - 1;
         auto J_m = std::ranges::find_if(unscheduled_operations,
-                                        [M_machine](const auto& op) { return op.machine_id == M_machine; })->job_id;
+                                        [M_machine](const auto& op) -> auto { return op.machine_id == M_machine; })->job_id;
         auto J_m_o = std::ranges::find_if(inactive_schedule.Row(M_machine),
-                                          [J_m](const auto& op) { return op.job_id == J_m; });
+                                          [J_m](const auto& op) -> auto { return op.job_id == J_m; });
         if (J_m_o != inactive_schedule.Row(M_machine).end()) {
-            if (std::ranges::any_of(conflict, [&J_m_o](const auto& op_time) { return *op_time.op == *J_m_o; })) {
+            if (std::ranges::any_of(conflict, [&J_m_o](const auto& op_time) -> auto { return *op_time.op == *J_m_o; })) {
                 std::uniform_int_distribution<> dist{0, inactive_schedule.SizeOfRow(M_machine) - 1};
                 auto& op_to_swap = inactive_schedule.At(M_machine, dist(gen));
                 if (std::ranges::none_of(
                     conflict,
-                    [&op_to_swap](const auto& op_time) { return *op_time.op == op_to_swap; })) {
+                    [&op_to_swap](const auto& op_time) -> auto { return *op_time.op == op_to_swap; })) {
                     std::swap(*J_m_o, op_to_swap);
                 }
             }
         }
         auto to_schedule = SelectAndUpdate(conflict);
         std::erase_if(unscheduled_operations, [&to_schedule](const auto& op)
-        {
+        -> auto {
             return *to_schedule.op == op;
         });
     }
@@ -131,7 +131,7 @@ jobshop_schedule GifflerThompson::operator()(
 }
 
 
-operation_with_times GifflerThompson::SelectAndUpdate(const std::vector<operation_with_times>& conflict)
+auto GifflerThompson::SelectAndUpdate(const std::vector<operation_with_times>& conflict) -> operation_with_times
 {
     std::mt19937 gen{std::random_device{}()};
     std::uniform_int_distribution<> dist{0, static_cast<int>(conflict.size()) - 1};
@@ -143,11 +143,11 @@ operation_with_times GifflerThompson::SelectAndUpdate(const std::vector<operatio
     return selected_op;
 }
 
-std::vector<operation_with_times> GifflerThompson::CreateConflictSet(const std::vector<operation_with_times>& ops_times)
+auto GifflerThompson::CreateConflictSet(const std::vector<operation_with_times>& ops_times) -> std::vector<operation_with_times>
 {
     const auto shortest_op = std::ranges::min_element(
         ops_times,
-        [](const auto& item1, const auto& item2) { return item1.finish_time < item2.finish_time; });
+        [](const auto& item1, const auto& item2) -> auto { return item1.finish_time < item2.finish_time; });
 
     std::vector<operation_with_times> conflict;
 
@@ -159,13 +159,13 @@ std::vector<operation_with_times> GifflerThompson::CreateConflictSet(const std::
     return conflict;
 }
 
-std::vector<operation_with_times> GifflerThompson::CalculateStartAndFinishForOperations(
-    const std::vector<operation>& unscheduled_operations)
+auto GifflerThompson::CalculateStartAndFinishForOperations(
+    const std::vector<operation>& unscheduled_operations) -> std::vector<operation_with_times>
 {
     auto schedulable = std::ranges::views::filter(
         unscheduled_operations,
         [&](const auto& op)
-        {
+        -> auto {
             return op.precedence == jobs_progress.at(op.job_id - 1);
         });
     std::vector<operation_with_times> ops_times{};
@@ -186,7 +186,7 @@ JobShopProblem::JobShopProblem(
       machines_num(machines_num),
       jobs_num(jobs_num) {}
 
-JobShopProblem JobShopProblem::LoadFromFile(const std::string& path)
+auto JobShopProblem::LoadFromFile(const std::string& path) -> JobShopProblem
 {
     std::ifstream file{path};
     std::string input;
@@ -216,7 +216,7 @@ JobShopProblem JobShopProblem::LoadFromFile(const std::string& path)
     return JobShopProblem{machine_num, job_num, operations};
 }
 
-float JobShopProblem::Objective(const jobshop_schedule& schedule) const
+auto JobShopProblem::Objective(const jobshop_schedule& schedule) const -> float
 {
     std::vector jobs_ready_time(jobs_num, 0.0f);
     std::vector machines_available_time(machines_num, 0.0f);
@@ -229,7 +229,7 @@ float JobShopProblem::Objective(const jobshop_schedule& schedule) const
     return *std::ranges::max_element(jobs_ready_time);
 }
 
-jobshop_schedule JobShopProblem::GenerateInstance() const
+auto JobShopProblem::GenerateInstance() const -> jobshop_schedule
 {
     GifflerThompson gt{jobs_num, machines_num};
     return gt(
@@ -238,20 +238,20 @@ jobshop_schedule JobShopProblem::GenerateInstance() const
         {operations.begin(), operations.end()});
 }
 
-const std::vector<operation>& JobShopProblem::GetOperations() const { return operations; }
+auto JobShopProblem::GetOperations() const -> const std::vector<operation>& { return operations; }
 
-int JobShopProblem::NumberOfMachines() const { return machines_num; }
+auto JobShopProblem::NumberOfMachines() const -> int { return machines_num; }
 
-int JobShopProblem::NumberOfOperations() const { return static_cast<int>(operations.size()); }
+auto JobShopProblem::NumberOfOperations() const -> int { return static_cast<int>(operations.size()); }
 
-int JobShopProblem::NumberOfJobs() const { return jobs_num; }
+auto JobShopProblem::NumberOfJobs() const -> int { return jobs_num; }
 
-jobshop_schedule ActiveScheduleFromInactive(
+auto ActiveScheduleFromInactive(
     const int n_operations,
     const int n_jobs,
     const int n_machines,
     std::vector<operation>&& operations,
-    DynamicMatrix<operation>& schedule)
+    DynamicMatrix<operation>& schedule) -> jobshop_schedule
 {
     GifflerThompson gt{n_jobs, n_machines};
     return gt(n_operations, std::move(operations), schedule);

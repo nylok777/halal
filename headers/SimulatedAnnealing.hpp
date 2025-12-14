@@ -25,7 +25,7 @@ class BoltzmannScheduleTemperature
 public:
     using temperature_func_tag = ::temperature_func_tag;
     explicit BoltzmannScheduleTemperature(const N temp0) : temp0(temp0) {}
-    N operator()(const int t) const
+    auto operator()(const int t) const -> N
     {
         return temp0 / std::log(t + 1);
     }
@@ -34,12 +34,12 @@ private:
 };
 
 template <class P, TemperatureFunc F, StopConditionFunctor S, typename T = P::SolutionType, typename N = T::NumberType>
-T SimulatedAnnealing(
+auto SimulatedAnnealing(
     const P* const solvable,
     S& stop_condition,
     F& temperature_func,
     const N eps,
-    const N kB)
+    const N kB) -> T
 {
     std::random_device rnd;
     std::mt19937 gen{rnd()};

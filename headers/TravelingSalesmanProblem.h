@@ -22,16 +22,16 @@ struct route
     using NumberType = double;
     std::vector<location> rep;
     double score = 0.0;
-    bool operator<(const route& other) const { return score < other.score; }
+    auto operator<(const route& other) const -> bool { return score < other.score; }
 };
 
 class TravelingSalesmanProblem : public OptimizationProblem<route, double>
 {
 public:
     explicit TravelingSalesmanProblem(std::vector<location>& all_locations);
-    [[nodiscard]] route GenerateInstance() const override;
-    [[nodiscard]] double Objective(const route&) const override;
-    [[nodiscard]] int NumberOfLocations() const;
+    [[nodiscard]] auto GenerateInstance() const -> route override;
+    [[nodiscard]] auto Objective(const route&) const -> double override;
+    [[nodiscard]] auto NumberOfLocations() const -> int;
 private:
     std::vector<location> all_locations;
 };

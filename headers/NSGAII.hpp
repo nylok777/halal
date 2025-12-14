@@ -138,7 +138,7 @@ auto NSGAII(
     const int parent_pool_size,
     const int n_offspring,
     C& comparator,
-    const int n_best,
+    const int n_parents,
     const float mutation_rate,
     S& stop_condition)
 {
@@ -168,7 +168,7 @@ auto NSGAII(
         new_gen_temp.reserve(n_offspring);
         for (int i = 0; i < n_offspring; ++i) {
             std::vector<T> parents;
-            for (int j = 0; j < 2; ++j) {
+            for (int j = 0; j < n_parents; ++j) {
                 parents.push_back(*potential_parents.at(int_dist(gen)));
             }
             auto child = problem->CrossOver(parents);

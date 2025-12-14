@@ -15,8 +15,8 @@ protected:
 	std::vector<Person> persons;
 	int requested_time;
 
-	float sumSalary(const std::vector<int>& solution) const;
-	float avgQuality(const std::vector<int>& solution) const;
+	auto sumSalary(const std::vector<int>& solution) const -> float;
+	auto avgQuality(const std::vector<int>& solution) const -> float;
 
 public:
 	virtual ~WorkAssignmentProblem() = default;

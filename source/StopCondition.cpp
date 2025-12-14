@@ -7,7 +7,7 @@
 StopConditionMinChangeRate::StopConditionMinChangeRate(const float min_change_rate, const int max_fails)
     : min_change_rate(min_change_rate), max_fails(max_fails) {}
 
-bool StopConditionMinChangeRate::operator()(const float score)
+auto StopConditionMinChangeRate::operator()(const float score) -> bool
 {
     if ((std::fabsf(score) - std::fabsf(last_score)) / std::fabsf(last_score) * 100.0f < std::fabsf(min_change_rate)) {
         ++fails_count;
@@ -20,7 +20,7 @@ bool StopConditionMinChangeRate::operator()(const float score)
 StopConditionMaxIterations::StopConditionMaxIterations(const int max_iterations)
     : max_iters(max_iterations) {}
 
-bool StopConditionMaxIterations::operator()()
+auto StopConditionMaxIterations::operator()() -> bool
 {
     ++iter_count;
     return iter_count < max_iters;

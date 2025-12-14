@@ -13,7 +13,7 @@ class StochasticQuadraticAssignment final : public QuadraticAssignmentProblem, p
 public:
     using QuadraticAssignmentProblem::QuadraticAssignmentProblem;
 
-    [[nodiscard]] assignment GenerateNeighbour(const assignment&, float eps) const override;
+    [[nodiscard]] auto GenerateNeighbour(const assignment&, float eps) const -> assignment override;
 };
 
 #endif //HALAL_STOCHASTICQUADRATICASSIGNMENT_H

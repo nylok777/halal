@@ -12,7 +12,7 @@ GeneticTravelingSalesman::GeneticTravelingSalesman(std::vector<location>& all_lo
     : TravelingSalesmanProblem(all_locations) {}
 
 
-route GeneticTravelingSalesman::CrossOver(const std::vector<route>& parents) const
+auto GeneticTravelingSalesman::CrossOver(const std::vector<route>& parents) const -> route
 {
     std::vector<location> child_locations;
     child_locations.reserve(NumberOfLocations());

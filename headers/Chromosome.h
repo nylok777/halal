@@ -14,7 +14,7 @@ class Chromosome
 public:
     using solution_type = T;
     virtual ~Chromosome() = default;
-    virtual auto CrossOver(const std::vector<T>&) const -> T = 0;
+    [[nodiscard]] virtual auto CrossOver(const std::vector<T>&) const -> T = 0;
     virtual void Mutate(T&) const = 0;
 };
 

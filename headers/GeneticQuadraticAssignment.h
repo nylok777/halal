@@ -13,7 +13,7 @@ class GeneticQuadraticAssignment final : public QuadraticAssignmentProblem, publ
 public:
     explicit GeneticQuadraticAssignment(const std::string& filename);
 
-    assignment CrossOver(const std::vector<assignment>&) const override;
+    auto CrossOver(const std::vector<assignment>&) const -> assignment override;
 
     void Mutate(assignment&) const override;
 };

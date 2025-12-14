@@ -23,7 +23,7 @@ void WorkAssignmentProblem::loadFromFile(const std::string& fileName)
 //
 // Objective functions
 //
-float WorkAssignmentProblem::sumSalary(const std::vector<int>& solution) const
+auto WorkAssignmentProblem::sumSalary(const std::vector<int>& solution) const -> float
 {
 	float sum = 0;
 	for (unsigned int i = 0; i < solution.size(); i++)
@@ -31,7 +31,7 @@ float WorkAssignmentProblem::sumSalary(const std::vector<int>& solution) const
 	return sum;
 }
 
-float WorkAssignmentProblem::avgQuality(const std::vector<int>& solution) const
+auto WorkAssignmentProblem::avgQuality(const std::vector<int>& solution) const -> float
 {
 	float sum = 0;
 	for (unsigned int i = 0; i < solution.size(); i++)

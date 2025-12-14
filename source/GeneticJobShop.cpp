@@ -23,7 +23,7 @@ void GeneticJobShop::Mutate(jobshop_schedule& child) const
     child.score = Objective(child);
 }
 
-jobshop_schedule GeneticJobShop::CrossOver(const std::vector<jobshop_schedule>& parents) const
+auto GeneticJobShop::CrossOver(const std::vector<jobshop_schedule>& parents) const -> jobshop_schedule
 {
     std::mt19937 gen{std::random_device{}()};
     std::uniform_int_distribution<int> job_dist{1, NumberOfJobs()};
@@ -48,7 +48,7 @@ jobshop_schedule GeneticJobShop::CrossOver(const std::vector<jobshop_schedule>& 
     }
     ++parent;
     auto op_is_empty = [](const operation& op)
-    {
+    -> bool {
         return op.job_id == 0 && op.time == 0.0 && op.machine_id == 0 && op.precedence == 0;
     };
     for (const auto& op : parent->rep) {

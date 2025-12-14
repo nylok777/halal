@@ -9,7 +9,7 @@
 
 GeneticQuadraticAssignment::GeneticQuadraticAssignment(const std::string& filename) : QuadraticAssignmentProblem(filename) {}
 
-assignment GeneticQuadraticAssignment::CrossOver(const std::vector<assignment>& parents) const
+auto GeneticQuadraticAssignment::CrossOver(const std::vector<assignment>& parents) const -> assignment
 {
     std::random_device rnd;
     std::mt19937 gen{rnd()};

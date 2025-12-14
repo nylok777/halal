@@ -15,7 +15,7 @@ public:
 
     T& operator()(const int i, const int j);
 
-    const T& operator()(const int i, const int j) const;
+    auto operator()(const int i, const int j) const -> const T&;
 
 private:
     int n;

@@ -12,7 +12,7 @@ class GeneticTravelingSalesman final : public TravelingSalesmanProblem, public C
 {
 public:
     explicit GeneticTravelingSalesman(std::vector<location>& all_locations);
-    route CrossOver(const std::vector<route>&) const override;
+    auto CrossOver(const std::vector<route>&) const -> route override;
     void Mutate(route&) const override;
 };
 
