@@ -9,6 +9,7 @@
 #include <memory>
 #include <random>
 #include <ranges>
+#include <iterator>
 
 namespace ranges = std::ranges;
 
@@ -42,10 +43,12 @@ public:
     class iterator
     {
     public:
-        using iter_category = std::forward_iterator_tag;
-        using diff_t = std::vector<range_iter_t>::difference_type;
-        using value_t = std::ranges::range_value_t<R>;
-        using ref_t = std::ranges::range_reference_t<R>;
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::vector<range_iter_t>::difference_type;
+        using value_type = std::ranges::range_value_t<R>;
+        using reference = std::ranges::range_reference_t<R>;
+        using pointer = value_type*;
+
         using vec_iter = std::vector<range_iter_t>::iterator;
 
     private:
@@ -55,10 +58,13 @@ public:
         iterator() = default;
         explicit iterator(vec_iter it) : current(it) {}
 
-        ref_t operator*() const
-        {
-            return **current;
-        }
+        reference operator*() const { return **current; }
+
+        pointer operator->() const { return current; }
+
+        reference operator*() { return **current; }
+
+        pointer operator->() { return current; }
 
         iterator& operator++()
         {
@@ -74,26 +80,31 @@ public:
         }
 
         bool operator==(const iterator& other) const { return current == other.current;}
+        bool operator<(const iterator& other) const { return current < other.current; }
     };
 
     auto begin() { return iterator{sampled->begin()}; }
 
     auto end() { return iterator{sampled->end()}; }
+
+    auto at(size_t idx) { return sampled->at(idx); }
+
+    auto size() const { return sampled->size(); }
 };
 
 template<typename R, typename Gen>
-sample_view(R&&, size_t, Gen&&) -> sample_view<std::views::all_t<R>, std::mt19937>;
+sample_view(R&&, size_t, Gen&&) -> sample_view<std::views::all_t<R>, Gen>;
 
-template<ranges::input_range V1, ranges::input_range V2>
-requires ranges::view<V1> &&
-    ranges::view<V2> &&
-    std::same_as<V1, V2>
-class concat_view : ranges::view_interface<concat_view<V1, V2>>
+template<ranges::input_range V>
+requires ranges::view<V>
+class concat_view : public ranges::view_interface<concat_view<V>>
 {
 public:
+    using range_value_t = ranges::range_value_t<V>;
+
     concat_view() = default;
 
-    concat_view(V1&& first, V2&& second) : base_first(first), base_second(second)
+    concat_view(V&& first, V&& second) : base_first(first), base_second(second)
     {
         std::vector<iter_t> iters;
         for (auto it = ranges::begin(base_first); it != ranges::end(base_first); ++it) {
@@ -106,58 +117,142 @@ public:
     }
 
 private:
-    V1 base_first;
-    V2 base_second;
-    using iter_t = ranges::iterator_t<V1>;
+    V base_first;
+    V base_second;
+    using iter_t = ranges::iterator_t<V>;
     std::shared_ptr<std::vector<iter_t>> concat;
 
 public:
     class iterator
     {
     public:
-        using iter_category = std::forward_iterator_tag;
-        using diff_t = std::vector<iter_t>::difference_type;
-        using ref_t = ranges::range_reference_t<V1>;
-        using value_t = ranges::range_value_t<V1>;
+        using iterator_category = std::random_access_iterator_tag;
+        using difference_type = std::vector<iter_t>::difference_type;
+        using reference = ranges::range_reference_t<V>;
+        using value_type = ranges::range_value_t<V>;
+        using size_type = std::vector<iter_t>::size_type;
+        using pointer = std::vector<iter_t>::pointer;
+        using allocator_type = std::vector<iter_t>::allocator_type;
 
         using vec_iter = std::vector<iter_t>::iterator;
+        using reverse_iterator = std::reverse_iterator<iterator>;
 
         iterator() = default;
 
         explicit iterator(vec_iter it) : current(it) {}
 
-        ref_t operator*()
+        iterator(const iterator&) = default;
+
+        auto operator*() -> reference { return **current; }
+
+        auto operator->() -> pointer { return current; }
+
+        auto operator*() const -> reference { return **current; }
+
+        auto operator->() const -> pointer { return current; }
+
+        auto operator[](size_type idx) -> value_type&
         {
-            return **current;
+            return **(current + idx);
         }
 
-        iterator& operator++()
+        auto operator[](size_type idx) const -> value_type&
+        {
+            return **(current + idx);
+        }
+
+        friend auto operator-(const iterator& first, const iterator& last) -> difference_type
+        {
+            return first.current - last.current;
+        }
+
+        auto operator++() -> iterator&
         {
             ++current;
             return *this;
         }
 
-        iterator operator++(int)
+        auto operator++(int) -> iterator
         {
             auto temp = *this;
             ++(*this);
             return temp;
         }
 
-        bool operator==(const iterator& other) const
+        auto operator--() -> iterator&
+        {
+            --current;
+            return *this;
+        }
+
+        auto operator--(int) -> iterator
+        {
+            auto temp = *this;
+            --(*this);
+            return temp;
+        }
+
+        auto operator+=(const difference_type rhs) -> iterator&
+        {
+            current += rhs;
+            return *this;
+        }
+
+        friend auto operator+(const iterator& lhs, const difference_type rhs) -> iterator
+        {
+            iterator temp = lhs;
+            return temp += rhs;
+        }
+
+        auto operator-=(const difference_type rhs) -> iterator&
+        {
+            current -= rhs;
+            return *this;
+        }
+
+        friend auto operator-(const iterator& lhs, const difference_type rhs) -> iterator
+        {
+            iterator temp = lhs;
+            return temp -= rhs;
+        }
+
+        auto operator==(const iterator& other) const -> bool
         {
             return current == other.current;
+        }
+
+        auto operator!=(const iterator& other) const -> bool
+        {
+            return current != other.current;
+        }
+
+        auto operator>(const iterator& other) const -> bool
+        {
+            return current > other.current;
+        }
+
+        auto operator<(const iterator& other) const -> bool
+        {
+            return current < other.current;
         }
 
     private:
         vec_iter current;
     };
 
-    auto begin() { return iterator(concat->begin()); }
+    //using iterator_t = iterator;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+
+    auto begin()  { return iterator(concat->begin()); }
     auto end() { return iterator(concat->end()); }
+    auto rbegin() { return reverse_iterator{end()}; }
+    auto rend() { return reverse_iterator{begin()}; }
+    auto size() const { return concat->size(); }
+    auto at(size_t idx) { return concat->at(idx); }
+    auto erase(iterator first, iterator last) { concat->erase(first.current, last.current); }
 };
 
-template<typename R1, typename R2>
-concat_view(R1&&, R2&&) -> concat_view<ranges::views::all_t<R1>, ranges::views::all_t<R2>>;
+template<typename R>
+concat_view(R&&, R&&) -> concat_view<ranges::views::all_t<R>>;
 
 #endif //HALAL_RANGESEXT_H

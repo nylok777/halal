@@ -6,7 +6,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "headers/GeneticAlgorithmSolver.hpp"
+#include "headers/GeneticAlgorithm.hpp"
 #include "headers/GeneticTravelingSalesman.h"
 #include "headers/location.h"
 

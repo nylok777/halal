@@ -15,9 +15,9 @@ assignment GeneticQuadraticAssignment::CrossOver(const std::vector<assignment>& 
     std::mt19937 gen{rnd()};
     std::uniform_int_distribution<> rand_parent(0, static_cast<int>(parents.size()) - 1);
     std::uniform_int_distribution<> rand_elem(0, static_cast<int>(parents[0].rep.size()) - 1);
-    auto child = std::vector<int>(parents[0].rep.size());
+    auto child_rep = std::vector<int>(parents[0].rep.size());
     auto used = std::unordered_set<int>();
-    for (auto& c : child) {
+    for (auto& c : child_rep) {
         bool available = true;
         while (available) {
             auto p_idx = rand_parent(gen);
@@ -29,7 +29,9 @@ assignment GeneticQuadraticAssignment::CrossOver(const std::vector<assignment>& 
             }
         }
     }
-    return assignment{child, Objective(child)};
+    auto child = assignment{std::move(child_rep)};
+    child.score = Objective(child);
+    return child;
 }
 
 void GeneticQuadraticAssignment::Mutate(assignment& child) const
@@ -39,5 +41,5 @@ void GeneticQuadraticAssignment::Mutate(assignment& child) const
     std::uniform_int_distribution<> dist(0, static_cast<int>(child.rep.size()) - 1);
 
     std::swap(child.rep[dist(gen)], child.rep[dist(gen)]);
-    child.score = Objective(child.rep);
+    child.score = Objective(child);
 }

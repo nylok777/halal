@@ -7,7 +7,7 @@
 #include <vector>
 #include <iosfwd>
 #include "DynamicMatrix.hpp"
-#include "ProblemRepresentation.h"
+#include "OptimizationProblem.h"
 
 struct operation
 {
@@ -31,7 +31,7 @@ struct jobshop_schedule
     bool operator<(const jobshop_schedule& other) const { return score < other.score; }
 };
 
-class JobShopProblem : public ProblemRepresentation<jobshop_schedule, float>
+class JobShopProblem : public OptimizationProblem<jobshop_schedule, float>
 {
 public:
     JobShopProblem(int machines_num, int jobs_num, std::vector<operation>& ops);

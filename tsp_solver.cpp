@@ -2,19 +2,20 @@
 // Created by david on 11/20/25.
 //
 
-#include "headers/GeneticAlgorithmSolver.hpp"
+#include "headers/GeneticAlgorithm.hpp"
 #include "headers/GeneticTravelingSalesman.h"
 #include "include/tsp_solver_c.h"
 #include "include/tsp_solver.h"
 
+#include <memory>
+
 std::vector<location> SolveTspInstance(std::vector<location>& all_delivery_points)
 {
-    GeneticTravelingSalesman tsp{all_delivery_points};
-    GeneticAlgorithmSolver<route, StopConditionMaxIterations> solver{
-        std::make_unique<GeneticTravelingSalesman>(tsp),
-        StopConditionMaxIterations{200}
-    };
-    auto result = solver.GeneticAlgorithm(
+    const auto tsp = std::make_shared<GeneticTravelingSalesman>(all_delivery_points);
+    StopConditionMaxIterations stop_cond{200};
+    auto result = GeneticAlgorithm(
+        tsp.get(),
+        stop_cond,
         4,
         100,
         10,

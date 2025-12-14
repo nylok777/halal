@@ -5,7 +5,7 @@
 #ifndef HALAL_TRAVELINGSALESMANPROBLEM_H
 #define HALAL_TRAVELINGSALESMANPROBLEM_H
 #include <vector>
-#include "ProblemRepresentation.h"
+#include "OptimizationProblem.h"
 
 using distance_from_location = std::pair<int, double>;
 
@@ -19,12 +19,13 @@ struct location
 
 struct route
 {
+    using NumberType = double;
     std::vector<location> rep;
     double score = 0.0;
     bool operator<(const route& other) const { return score < other.score; }
 };
 
-class TravelingSalesmanProblem : public ProblemRepresentation<route, double>
+class TravelingSalesmanProblem : public OptimizationProblem<route, double>
 {
 public:
     explicit TravelingSalesmanProblem(std::vector<location>& all_locations);

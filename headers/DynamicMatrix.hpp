@@ -14,43 +14,53 @@ template <typename T>
 class DynamicMatrix;
 
 template <typename T>
-std::ostream& operator<<(std::ostream& stream, const DynamicMatrix<T>& matrix);
+auto operator<<(std::ostream& stream, const DynamicMatrix<T>& matrix) -> std::ostream&;
 
 template <typename T>
 class DynamicMatrix
 {
 public:
+    DynamicMatrix() = default;
+
     explicit DynamicMatrix(const int n_rows);
 
-    void PushBack(const int n_row, const T& value);
+    explicit DynamicMatrix(int n_rows, int n_cols);
 
-    void PopBack(const int n_row);
+    void PushBack(const int row, const T& value);
 
-    void Insert(const int n_row, const int n_col, const T& value);
+    template<std::ranges::forward_range R>
+    requires std::same_as<std::ranges::range_value_t<R>, T>
+    void PushBack(R&& row_range);
 
-    void Resize(const int n_row, const int size);
+    void PopBack(const int row);
+
+    void Insert(const int row, const int col, const T& value);
+
+    void Resize(const int col, const int size);
 
     void Resize(const int size);
 
-    std::vector<T>& Row(const int n_row);
+    auto Row(const int row) -> std::vector<T>&;
 
-    const std::vector<T>& Row(const int n_row) const;
+    auto Row(const int row) const -> const std::vector<T>&;
 
-    std::vector<const T*> Column(const int n_col) const;
+    auto Column(const int col) const -> std::vector<const T*>;
 
-    const T& At(const int row_i, const int col_i) const;
+    auto Column(int col) -> std::vector<T*>;
 
-    T& At(const int row_i, const int col_i);
+    auto At(const int row, const int col) const -> const T&;
 
-    [[nodiscard]] int RowCount() const;
+    auto At(const int row, const int col) -> T&;
 
-    [[nodiscard]] int ColumnCount() const;
+    [[nodiscard]] auto RowCount() const -> int;
 
-    [[nodiscard]] int Size() const;
+    [[nodiscard]] auto ColumnCount() const -> int;
 
-    [[nodiscard]] int SizeOfRow(const int n_row) const;
+    [[nodiscard]] auto Size() const -> int;
 
-    friend std::ostream& operator<<<T>(std::ostream& stream, const DynamicMatrix<T>& matrix);
+    [[nodiscard]] auto SizeOfRow(const int n_row) const -> int;
+
+    friend auto operator<<<T>(std::ostream& stream, const DynamicMatrix<T>& matrix) -> std::ostream&;
 
 private:
     std::map<int, std::vector<T>> rows;
@@ -60,35 +70,42 @@ public:
     class iterator
     {
     public:
-        using iterator_category = std::forward_iterator_tag;
+        using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = T;
         using reference = value_type&;
         using pointer = value_type*;
 
-        bool operator==(const iterator& other) const;
+        auto operator==(const iterator& other) const -> bool;
 
-        bool operator!=(const iterator& other) const;
+        auto operator!=(const iterator& other) const -> bool;
 
-        iterator& operator++();
+        auto operator++() -> iterator&;
 
-        iterator operator++(int);
+        auto operator++(int) -> iterator;
 
-        T& operator*();
+        auto operator--() -> iterator&;
 
-        T* operator->();
+        auto operator--(int) -> iterator;
 
-        friend iterator DynamicMatrix::begin();
+        auto operator*() -> T&;
 
-        friend iterator DynamicMatrix::end();
+        auto operator->() -> T*;
+
+        friend auto DynamicMatrix::begin() -> iterator;
+
+        friend auto DynamicMatrix::end() -> iterator;
 
     private:
         explicit iterator(std::map<int, std::vector<T>>* const current);
 
         iterator(std::vector<T>* const end_row, std::map<int, std::vector<T>>* const end);
 
+        iterator(const iterator& it);
+
         std::map<int, std::vector<T>>::iterator current_row;
         std::vector<T>::iterator current_vec_iter;
+        std::vector<T>::iterator current_vec_begin;
         std::vector<T>::iterator current_vec_end;
         std::map<int, std::vector<T>>::iterator matrix_end;
     };
@@ -102,19 +119,21 @@ public:
         using reference = const value_type&;
         using pointer = const value_type*;
 
-        bool operator==(const const_iterator& other) const;
+        auto operator==(const const_iterator& other) const -> bool;
 
-        bool operator!=(const const_iterator& other) const;
+        auto operator!=(const const_iterator& other) const -> bool;
 
-        const_iterator operator++();
+        auto operator++() -> const_iterator&;
 
-        const T& operator*();
+        auto operator++(int) -> const_iterator;
 
-        const T* operator->();
+        auto operator*() -> const T&;
 
-        friend const_iterator DynamicMatrix::begin() const;
+        auto operator->() -> const T*;
 
-        friend const_iterator DynamicMatrix::end() const;
+        friend auto DynamicMatrix::cbegin() const -> const_iterator;
+
+        friend auto DynamicMatrix::cend() const -> const_iterator;
 
     private:
         explicit const_iterator(const std::map<int, std::vector<T>>* const current);
@@ -127,13 +146,17 @@ public:
         std::map<int, std::vector<T>>::const_iterator matrix_end;
     };
 
-    iterator begin();
+    auto begin() -> iterator;
 
-    iterator end();
+    auto end() -> iterator;
 
-    const_iterator begin() const;
+    auto begin() const -> const_iterator;
 
-    const_iterator end() const;
+    auto end() const -> const_iterator;
+
+    auto cbegin() const -> const_iterator;
+
+    auto cend() const -> const_iterator;
 };
 
 template <typename T>
@@ -160,63 +183,114 @@ DynamicMatrix<T>::DynamicMatrix(const int n_rows) : n_rows(n_rows)
 }
 
 template <typename T>
-void DynamicMatrix<T>::PushBack(const int n_row, const T& value) { rows.find(n_row)->second.push_back(value); }
-
-template <typename T>
-void DynamicMatrix<T>::PopBack(const int n_row) { rows.extract(n_row).mapped().pop_back(); }
-
-
-template <typename T>
-void DynamicMatrix<T>::Insert(const int n_row, const int n_col, const T& value)
+DynamicMatrix<T>::DynamicMatrix(const int n_rows, const int n_cols) : n_rows(n_rows)
 {
-    rows.find(n_row)->second.at(n_col) = value;
-}
-
-template <typename T>
-void DynamicMatrix<T>::Resize(const int n_row, const int size) { rows.find(n_row)->second.resize(size); }
-
-
-template <typename T>
-void DynamicMatrix<T>::Resize(const int size) { for (auto& row : rows) { row.second.resize(size); } }
-
-template <typename T>
-std::vector<T>& DynamicMatrix<T>::Row(const int n_row) { return rows.find(n_row)->second; }
-
-template <typename T>
-const std::vector<T>& DynamicMatrix<T>::Row(const int n_row) const { return rows.find(n_row)->second; }
-
-template <typename T>
-std::vector<const T*> DynamicMatrix<T>::Column(const int n_col) const
-{
-    std::vector<const T*> col;
-    for (auto& row : rows) {
-        if (n_col >= row.second.size()) continue;
-        auto item_ptr = &row.second.at(n_col);
-        col.push_back(item_ptr);
+    std::map<int, std::vector<T>> matrix;
+    for (int i = 0; i < n_rows; ++i) {
+        std::vector<T> row(n_cols);
+        matrix.insert(std::make_pair(i, row));
     }
-    return col;
+    rows = matrix;
 }
 
 template <typename T>
-const T& DynamicMatrix<T>::At(const int row_i, const int col_i) const { return rows.at(row_i).at(col_i); }
+void DynamicMatrix<T>::PushBack(const int row, const T& value) { rows.find(row)->second.push_back(value); }
 
 template <typename T>
-T& DynamicMatrix<T>::At(const int row_i, const int col_i) { return rows.at(row_i).at(col_i); }
+template <std::ranges::forward_range R>
+requires std::same_as<std::ranges::range_value_t<R>, T>
+void DynamicMatrix<T>::PushBack(R&& row_range)
+{
+    rows.emplace(++n_rows, std::vector<T>{std::ranges::begin(row_range), std::ranges::end(row_range)});
+}
 
 template <typename T>
-int DynamicMatrix<T>::RowCount() const { return n_rows; }
+void DynamicMatrix<T>::PopBack(const int row) { rows.extract(row).mapped().pop_back(); }
+
 
 template <typename T>
-int DynamicMatrix<T>::ColumnCount() const
+void DynamicMatrix<T>::Insert(const int row, const int col, const T& value)
+{
+    rows.find(row)->second.at(col) = value;
+}
+
+template <typename T>
+void DynamicMatrix<T>::Resize(const int col, const int size) { rows.find(col)->second.resize(size); }
+
+
+template <typename T>
+void DynamicMatrix<T>::Resize(const int size)
+{
+    for (auto& row : rows) {
+        row.second.resize(size);
+    }
+}
+
+template <typename T>
+auto DynamicMatrix<T>::Row(const int row) -> std::vector<T>&
+{
+    return rows.find(row)->second;
+}
+
+template <typename T>
+auto DynamicMatrix<T>::Row(const int row) const -> const std::vector<T>&
+{
+    return rows.find(row)->second;
+}
+
+template <typename T>
+auto DynamicMatrix<T>::Column(const int col) const -> std::vector<const T*>
+{
+    std::vector<const T*> column;
+    for (auto& row : rows) {
+        if (col >= row.second.size()) continue;
+        auto item_ptr = &row.second.at(col);
+        column.push_back(item_ptr);
+    }
+    return column;
+}
+
+template <typename T>
+auto DynamicMatrix<T>::Column(int col) -> std::vector<T*>
+{
+    std::vector<T*> column;
+    for (auto& row : rows) {
+        if (col >= row.second.size()) continue;
+        auto item = &row.second.at(col);
+        column.push_back(item);
+    }
+    return column;
+}
+
+template <typename T>
+auto DynamicMatrix<T>::At(const int row, const int col) const -> const T&
+{
+    return rows.at(row).at(col);
+}
+
+template <typename T>
+auto DynamicMatrix<T>::At(const int row, const int col) -> T&
+{
+    return rows.at(row).at(col);
+}
+
+template <typename T>
+auto DynamicMatrix<T>::RowCount() const -> int
+{
+    return n_rows;
+}
+
+template <typename T>
+auto DynamicMatrix<T>::ColumnCount() const -> int
 {
     auto largest = std::ranges::max_element(
         rows,
-        [](const auto& a, const auto& b) { return a.second.size() < b.second.size(); });
+        [](const auto& a, const auto& b) -> bool { return a.second.size() < b.second.size(); });
     return largest->second.size();
 }
 
 template <typename T>
-int DynamicMatrix<T>::Size() const
+auto DynamicMatrix<T>::Size() const -> int
 {
     auto size = 0;
     for (const auto& row : rows) {
@@ -226,19 +300,19 @@ int DynamicMatrix<T>::Size() const
 }
 
 template <typename T>
-int DynamicMatrix<T>::SizeOfRow(const int n_row) const { return rows.find(n_row)->second.size(); }
+auto DynamicMatrix<T>::SizeOfRow(const int n_row) const -> int { return rows.find(n_row)->second.size(); }
 
 template <typename T>
-bool DynamicMatrix<T>::iterator::operator==(const iterator& other) const
+auto DynamicMatrix<T>::iterator::operator==(const iterator& other) const -> bool
 {
     return current_vec_iter == other.current_vec_iter;
 }
 
 template <typename T>
-bool DynamicMatrix<T>::iterator::operator!=(const iterator& other) const { return !(*this == other); }
+auto DynamicMatrix<T>::iterator::operator!=(const iterator& other) const -> bool { return !(*this == other); }
 
 template <typename T>
-DynamicMatrix<T>::iterator& DynamicMatrix<T>::iterator::operator++()
+auto DynamicMatrix<T>::iterator::operator++() -> iterator&
 {
     ++current_vec_iter;
     if (current_vec_iter == current_vec_end) {
@@ -251,7 +325,7 @@ DynamicMatrix<T>::iterator& DynamicMatrix<T>::iterator::operator++()
 }
 
 template <typename T>
-DynamicMatrix<T>::iterator DynamicMatrix<T>::iterator::operator++(int)
+auto DynamicMatrix<T>::iterator::operator++(int) -> iterator
 {
     iterator temp = *this;
     ++(*this);
@@ -259,16 +333,43 @@ DynamicMatrix<T>::iterator DynamicMatrix<T>::iterator::operator++(int)
 }
 
 template <typename T>
-T& DynamicMatrix<T>::iterator::operator*() { return *current_vec_iter; }
+auto DynamicMatrix<T>::iterator::operator--() -> iterator&
+{
+    --current_vec_iter;
+    if (current_vec_iter == current_vec_begin) {
+        --current_row;
+        current_vec_iter = current_row->second.begin();
+        current_vec_end = current_row->second.end();
+    }
+    return *this;
+}
 
 template <typename T>
-T* DynamicMatrix<T>::iterator::operator->() { return current_vec_iter; }
+auto DynamicMatrix<T>::iterator::operator--(int) -> iterator
+{
+    auto temp = *this;
+    --(*this);
+    return temp;
+}
+
+template <typename T>
+auto DynamicMatrix<T>::iterator::operator*() -> T&
+{
+    return *current_vec_iter;
+}
+
+template <typename T>
+auto DynamicMatrix<T>::iterator::operator->() -> T*
+{
+    return current_vec_iter;
+}
 
 template <typename T>
 DynamicMatrix<T>::iterator::iterator(std::map<int, std::vector<T>>* const current)
     :
     current_row(current->begin()),
     current_vec_iter(current->begin()->second.begin()),
+    current_vec_begin(current->begin()->second.begin()),
     current_vec_end(current->begin()->second.end()),
     matrix_end(current->end()) {}
 
@@ -281,19 +382,28 @@ DynamicMatrix<T>::iterator::iterator(std::vector<T>* const end_row, std::map<int
     matrix_end(end->end()) {}
 
 template <typename T>
-bool DynamicMatrix<T>::const_iterator::operator==(const const_iterator& other) const
+DynamicMatrix<T>::iterator::iterator(const iterator& it)
+    :
+    current_row(it.current_row),
+    current_vec_iter(it.current_vec_iter),
+    current_vec_begin(it.current_vec_begin),
+    current_vec_end(it.current_vec_end),
+    matrix_end(it.matrix_end) {}
+
+template <typename T>
+auto DynamicMatrix<T>::const_iterator::operator==(const const_iterator& other) const -> bool
 {
     return current_vec_iter == other.current_vec_iter;
 }
 
 template <typename T>
-bool DynamicMatrix<T>::const_iterator::operator!=(const const_iterator& other) const
+auto DynamicMatrix<T>::const_iterator::operator!=(const const_iterator& other) const -> bool
 {
     return !(*this == other);
 }
 
 template <typename T>
-DynamicMatrix<T>::const_iterator DynamicMatrix<T>::const_iterator::operator++()
+auto DynamicMatrix<T>::const_iterator::operator++() -> const_iterator&
 {
     ++current_vec_iter;
     if (current_vec_iter == current_vec_end) {
@@ -306,10 +416,24 @@ DynamicMatrix<T>::const_iterator DynamicMatrix<T>::const_iterator::operator++()
 }
 
 template <typename T>
-const T& DynamicMatrix<T>::const_iterator::operator*() { return *current_vec_iter; }
+auto DynamicMatrix<T>::const_iterator::operator++(int) -> const_iterator
+{
+    const_iterator temp = *this;
+    ++(*this);
+    return temp;
+}
 
 template <typename T>
-const T* DynamicMatrix<T>::const_iterator::operator->() { return current_vec_iter; }
+auto DynamicMatrix<T>::const_iterator::operator*() -> const T&
+{
+    return *current_vec_iter;
+}
+
+template <typename T>
+auto DynamicMatrix<T>::const_iterator::operator->() -> const T*
+{
+    return current_vec_iter;
+}
 
 template <typename T>
 DynamicMatrix<T>::const_iterator::const_iterator(const std::map<int, std::vector<T>>* const current)
@@ -330,16 +454,22 @@ DynamicMatrix<T>::const_iterator::const_iterator(
     matrix_end(end->cend()) {}
 
 template <typename T>
-DynamicMatrix<T>::iterator DynamicMatrix<T>::begin() { return iterator{&rows}; }
+auto DynamicMatrix<T>::begin() -> iterator { return iterator{&rows}; }
 
 template <typename T>
-DynamicMatrix<T>::iterator DynamicMatrix<T>::end() { return iterator{&rows.rbegin()->second, &rows}; }
+auto DynamicMatrix<T>::end() -> iterator { return iterator{&rows.rbegin()->second, &rows}; }
 
 template <typename T>
-DynamicMatrix<T>::const_iterator DynamicMatrix<T>::begin() const { return const_iterator{&rows}; }
+auto DynamicMatrix<T>::begin() const -> const_iterator { return cbegin(); }
 
 template <typename T>
-DynamicMatrix<T>::const_iterator DynamicMatrix<T>::end() const
+auto DynamicMatrix<T>::end() const -> const_iterator { return cend(); }
+
+template <typename T>
+auto DynamicMatrix<T>::cbegin() const -> const_iterator { return const_iterator{&rows}; }
+
+template <typename T>
+auto DynamicMatrix<T>::cend() const -> const_iterator
 {
     return const_iterator{&rows.rbegin()->second, &rows};
 }

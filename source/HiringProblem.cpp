@@ -7,72 +7,64 @@
 #include <algorithm>
 #include <random>
 
+auto candidate_selection::operator<(const candidate_selection& other) const -> bool
+{
+    return candidates < other.candidates;
+}
+
+auto candidate_selection::operator==(const candidate_selection& other) const -> bool
+{
+    return !(*this < other) && !(other < *this);
+}
+
 HiringProblem::HiringProblem(const std::string& filename, const int n_people_to_hire)
     : WorkAssignmentProblem(), n_people_to_hire(n_people_to_hire)
 {
     WorkAssignmentProblem::loadFromFile(filename);
 }
 
-candidate_selection HiringProblem::GenerateInstance() const
+auto HiringProblem::GenerateInstance() const -> candidate_selection
 {
     std::mt19937 gen{std::random_device{}()};
     std::uniform_real_distribution<float> dist;
-    std::vector<int> people; people.reserve(persons.size());
-    for (int i = 0; i < persons.size(); ++i) {
-        if (dist(gen) < 0.5f) {
-            people.push_back(i);
+    std::uniform_int_distribution<int> n_people{1, static_cast<int>(persons.size())};
+    std::vector<int> people;
+    const auto n_hired = n_people(gen);
+    while (people.empty()) {
+        for (int i = 0; i < persons.size(); ++i) {
+            if (dist(gen) < 0.5f) {
+                people.push_back(i);
+            }
+            if (people.size() == n_hired) break;
         }
-        if (people.size() == n_people_to_hire) break;
     }
+    people.shrink_to_fit();
     return candidate_selection{std::move(people)};
 }
 
-bool HiringProblem::IsParetoDominatedBy(const candidate_selection& a, const candidate_selection& b) const
+float HiringProblem::SumSalary(const candidate_selection& selection) const
 {
-    return !(avgQuality(a.candidates) >= avgQuality(b.candidates) ||
-        sumSalary(a.candidates) <= sumSalary(b.candidates));
+    return sumSalary(selection.candidates);
 }
 
-std::vector<float> HiringProblem::Objectives(candidate_selection& selection) const
+float HiringProblem::AvgQuality(const candidate_selection& selection) const
 {
-    std::vector<float> scores;
-    scores.push_back(avgQuality(selection.candidates));
-    scores.push_back(sumSalary(selection.candidates));
-    return scores;
+    return avgQuality(selection.candidates);
 }
 
-std::vector<std::function<float(candidate_selection&)>> HiringProblem::GetObjectives() const
+auto HiringProblem::GetObjectives() const -> std::vector<std::function<float(const candidate_selection&)>>
 {
-    std::function<float(candidate_selection&)> sum_salary{[this](const candidate_selection& x)
-    {
-        return sumSalary(x.candidates);
-    }};
-    std::function<float(candidate_selection&)> avg_quality{[this](const candidate_selection& x)
-    {
-        return avgQuality(x.candidates);
-    }};
+    using std::placeholders::_1;
+    std::function<float(const candidate_selection&)> sum_salary = std::bind(&HiringProblem::SumSalary, this, _1);
+    std::function<float(const candidate_selection&)> avg_quality = std::bind(&HiringProblem::AvgQuality, this, _1);
     return {std::move(sum_salary), std::move(avg_quality)};
 }
 
-template<>
-candidate_selection CrossOver(const candidate_selection& parent1, const candidate_selection& parent2)
-{
-    std::vector<int> child; child.reserve(parent1.candidates.size());
-    for (int i = 0; i < parent1.candidates.size() / 2; ++i) {
-        child.push_back(parent1.candidates[i]);
-    }
-    for (int i = 0; i < parent2.candidates.size() && child.size() < parent2.candidates.size(); ++i) {
-        if (std::ranges::find(child, parent2.candidates[i]) == child.end()) {
-            child.push_back(parent2.candidates[i]);
-        }
-    }
-    return candidate_selection{std::move(child)};
-}
+ParetoDominanceComparator::ParetoDominanceComparator(const HiringProblem* problem)
+    : problem(problem) {}
 
-template<>
-bool IsParetoDominatedBy(const candidate_selection& a, const candidate_selection& b)
+auto ParetoDominanceComparator::operator()(const candidate_selection& a, const candidate_selection& b) const -> bool
 {
-    auto funcs
-    return !(avgQuality(a.candidates) >= avgQuality(b.candidates) ||
-        sumSalary(a.candidates) <= sumSalary(b.candidates));
+    const auto funcs = problem->GetObjectives();
+    return funcs.at(0)(a) > funcs.at(0)(b) && funcs.at(1)(a) < funcs.at(1)(b);
 }

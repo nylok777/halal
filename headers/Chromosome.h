@@ -14,11 +14,8 @@ class Chromosome
 public:
     using solution_type = T;
     virtual ~Chromosome() = default;
-    virtual T CrossOver(const std::vector<T>&) const = 0;
+    virtual auto CrossOver(const std::vector<T>&) const -> T = 0;
     virtual void Mutate(T&) const = 0;
 };
-
-template<typename T>
-T CrossOver(const T& parent1, const T& parent2);
 
 #endif //HALAL_GENETICSOLVABLE_H

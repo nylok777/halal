@@ -3,31 +3,31 @@
 //
 #ifndef HALAL_QUADRATICASSIGNMENTPROBLEM_H
 #define HALAL_QUADRATICASSIGNMENTPROBLEM_H
-#include <cmath>
 #include <string>
 #include <vector>
 
 #include "JobShopProblem.h"
-#include "ProblemRepresentation.h"
+#include "OptimizationProblem.h"
 #include "SymmetricMatrix.hpp"
 
 struct assignment
 {
+    using NumberType = float;
     std::vector<int> rep;
     float score;
 };
 
 class QuadraticAssignmentProblem
-    : public ProblemRepresentation<std::vector<int>, float>
+    : public OptimizationProblem<assignment, float>
 {
 public:
     explicit QuadraticAssignmentProblem(const std::string& filename);
 
-    std::vector<int> GenerateInstance() const override;
+    [[nodiscard]] auto GenerateInstance() const -> assignment override;
 
-    float Objective(const std::vector<int>&) const override;
+    [[nodiscard]] auto Objective(const assignment&) const -> float override;
 
-    int ProblemSize() const;
+    [[nodiscard]] auto ProblemSize() const -> int;
 
 private:
     int n = 0;

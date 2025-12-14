@@ -8,17 +8,12 @@
 
 #include "QuadraticAssignmentProblem.h"
 
-class StochasticQuadraticAssignment final : public StochasticSolvable<assignment>
+class StochasticQuadraticAssignment final : public QuadraticAssignmentProblem, public StochasticSolvable<QuadraticAssignmentProblem::SolutionType>
 {
 public:
-    explicit StochasticQuadraticAssignment(QuadraticAssignmentProblem quadratic_assignment_problem);
+    using QuadraticAssignmentProblem::QuadraticAssignmentProblem;
 
     [[nodiscard]] assignment GenerateNeighbour(const assignment&, float eps) const override;
-
-    assignment GenerateInstance() override;
-
-private:
-    QuadraticAssignmentProblem quadratic_assignment_problem;
 };
 
 #endif //HALAL_STOCHASTICQUADRATICASSIGNMENT_H

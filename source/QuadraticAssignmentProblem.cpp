@@ -36,7 +36,7 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(const std::string& filena
     }
 }
 
-std::vector<int> QuadraticAssignmentProblem::GenerateInstance() const
+auto QuadraticAssignmentProblem::GenerateInstance() const -> assignment
 {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
@@ -44,6 +44,7 @@ std::vector<int> QuadraticAssignmentProblem::GenerateInstance() const
 
     std::unordered_set<int> used_facilities;
     auto bijection = std::vector<int>(n);
+
     for (int i = 0; i < n; ++i) {
         bool available = true;
         while (available) {
@@ -54,15 +55,15 @@ std::vector<int> QuadraticAssignmentProblem::GenerateInstance() const
             }
         }
     }
-    return bijection;
+    return assignment{std::move(bijection)};
 }
 
-float QuadraticAssignmentProblem::Objective(const std::vector<int>& p) const
+float QuadraticAssignmentProblem::Objective(const assignment& p) const
 {
     float sum = 0.0;
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {
-            sum += weight_matrix(p[i], p[j]) * distance_matrix(i, j) * 2.0f;
+            sum += weight_matrix(p.rep[i], p.rep[j]) * distance_matrix(i, j) * 2.0f;
         }
     }
     return sum;

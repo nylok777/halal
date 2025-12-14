@@ -4,27 +4,40 @@
 
 #ifndef HALAL_HIRINGPROBLEM_H
 #define HALAL_HIRINGPROBLEM_H
-#include "ProblemRepresentation.h"
+#include "OptimizationProblem.h"
 #include "WorkAssignment.h"
 
 struct candidate_selection
 {
     using ObjectiveReturnType = float;
-    std::vector<int> candidates;
-    int pareto_rank;
-    int dominated_by;
+    std::vector<int> candidates{};
+    int pareto_rank = 0;
+    int dominated_by = 0;
+    bool operator<(const candidate_selection& other) const;
+    bool operator==(const candidate_selection& other) const;
 };
 
 class HiringProblem : public WorkAssignmentProblem, public ParetoOptimizationProblem<candidate_selection, float>
 {
 public:
+    HiringProblem() = default;
     explicit HiringProblem(const std::string& filename, const int n_people_to_hire);
-    candidate_selection GenerateInstance() const override;
-    bool IsParetoDominatedBy(const candidate_selection& a, const candidate_selection& b) const override;
-    std::vector<std::function<float(candidate_selection&)>> GetObjectives() const override;
-    std::vector<float> Objectives(candidate_selection&) const override;
+    [[nodiscard]] auto GenerateInstance() const -> candidate_selection override;
+    [[nodiscard]] auto GetObjectives() const -> std::vector<std::function<float(const candidate_selection&)>> override;
 protected:
+    float SumSalary(const candidate_selection& selection) const;
+    float AvgQuality(const candidate_selection& selection) const;
     int n_people_to_hire;
+};
+
+class ParetoDominanceComparator : public IParetoDominanceComparator<candidate_selection>
+{
+public:
+    explicit ParetoDominanceComparator(const HiringProblem* problem);
+    auto operator()(const candidate_selection& a, const candidate_selection& b) const -> bool override;
+
+private:
+    const HiringProblem* problem;
 };
 
 #endif //HALAL_HIRINGPROBLEM_H

@@ -8,16 +8,13 @@
 #include <unordered_set>
 #include <utility>
 
-StochasticQuadraticAssignment::StochasticQuadraticAssignment(QuadraticAssignmentProblem quadratic_assignment_problem)
-    : quadratic_assignment_problem(std::move(quadratic_assignment_problem)) {}
-
 assignment StochasticQuadraticAssignment::GenerateNeighbour(const assignment& p, const float eps) const
 {
     std::random_device rnd;
     std::mt19937 gen{rnd()};
-    std::uniform_int_distribution<> dist(0, quadratic_assignment_problem.ProblemSize() - 1);
+    std::uniform_int_distribution<> dist(0, ProblemSize() - 1);
     const auto epsilon = static_cast<int>(eps);
-    std::vector<int> q = p.rep;
+    auto q = p;
 
     std::vector<int> indices(epsilon);
     std::unordered_set<int> used{};
@@ -40,20 +37,13 @@ assignment StochasticQuadraticAssignment::GenerateNeighbour(const assignment& p,
     int j = 0;
     for (const auto index : indices) {
         int val = values.at(j);
-        const auto tmp_it = std::ranges::find(q, val);
-        const auto tmp_idx = std::distance(q.begin(), tmp_it);
-        const auto tmp = q[index];
-        q[index] = values.at(j);
-        q[tmp_idx] = tmp;
+        const auto tmp_it = std::ranges::find(q.rep, val);
+        const auto tmp_idx = std::distance(q.rep.begin(), tmp_it);
+        const auto tmp = q.rep[index];
+        q.rep[index] = values.at(j);
+        q.rep[tmp_idx] = tmp;
         j++;
     }
-    const auto q_score = quadratic_assignment_problem.Objective(q);
-    return assignment{std::move(q), q_score};
-}
-
-assignment StochasticQuadraticAssignment::GenerateInstance()
-{
-    auto instance = quadratic_assignment_problem.GenerateInstance();
-    const auto score = quadratic_assignment_problem.Objective(instance);
-    return assignment{std::move(instance), score};
+    q.score = Objective(q);
+    return q;
 }
