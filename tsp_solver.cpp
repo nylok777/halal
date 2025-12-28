@@ -2,8 +2,8 @@
 // Created by david on 11/20/25.
 //
 
-#include "headers/GeneticAlgorithm.hpp"
-#include "headers/GeneticTravelingSalesman.h"
+#include "solvers/GeneticAlgorithm.hpp"
+#include "problems/GeneticTravelingSalesman.h"
 #include "include/tsp_solver_c.h"
 #include "include/tsp_solver.h"
 

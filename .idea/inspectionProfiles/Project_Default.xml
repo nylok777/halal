@@ -1,0 +1,32 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="ClangTidy" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="clangTidyCheckOptions">
+        <list>
+          <ClangTidyCheckOption>
+            <option name="optionName" value="cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor" />
+            <option name="optionValue" value="true" />
+          </ClangTidyCheckOption>
+        </list>
+      </option>
+      <option name="clangTidyChecks" value="-*,bugprone-*,clang-analyzer-*,cppcoreguidelines-*,mpi-*,readability-*,cert-err52-cpp,cert-err60-cpp,cert-err34-c,cert-str34-c,cert-msc50-cpp,cert-msc51-cpp,cert-dcl58-cpp,cert-flp30-c,hicpp-multiway-paths-covered,hicpp-exception-baseclass,modernize-*,-modernize-use-designated-initializers,openmp-use-default-none,performance-*,-performance-avoid-endl,portability-std-allocator-const,portability-simd-intrinsics,-readability-avoid-const-params-in-decls,-bugprone-easily-swappable-parameters,-readability-braces-around-statements,-readability-identifier-length,-modernize-use-trailing-return-type,-readability-uppercase-literal-suffix,-cppcoreguidelines-non-private-member-variables-in-classes" />
+    </inspection_tool>
+    <inspection_tool class="CppAwaiterTypeIsNotClass" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppClassIsIncomplete" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppConstParameterInDeclaration" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="CppCoroutineCallResolveError" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppDefaultInitializationWithNoUserConstructor" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppExplicitSpecializationInNonNamespaceScope" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppLocalVariableWithNonTrivialDtorIsNeverUsed" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="CppMutableSpecifierOnReferenceMember" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppOutParameterMustBeWritten" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppRedundantQualifierADL" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="CppTemplateParameterShadowing" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppUninitializedDependentBaseClass" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppUnionMemberOfReferenceType" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppUserDefinedLiteralSuffixDoesNotStartWithUnderscore" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="CppWarningDirective" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="RadGlobal" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+  </profile>
+</component>

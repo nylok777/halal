@@ -5,11 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 include(GNUInstallDirs)
 
 add_library(tsp_solver SHARED
-        source/TravelingSalesmanProblem.cpp
-        source/GeneticTravelingSalesman.cpp
-        source/StopCondition.cpp
-        headers/Solution.h
-        headers/GeneticAlgorithm.hpp
+        problems/TravelingSalesmanProblem.cpp
+        problems/GeneticTravelingSalesman.cpp
+        interfaces-and-templates/Solution.h
+        solvers/GeneticAlgorithm.hpp
         tsp_solver.cpp
 )
 
@@ -23,7 +22,7 @@ set_target_properties(tsp_solver PROPERTIES
 )
 
 include_directories(.)
-include_directories("headers")
+include_directories("utils")
 
 install(TARGETS tsp_solver
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -32,27 +31,28 @@ install(TARGETS tsp_solver
 
 add_executable(halal
         main.cpp
-        source/QuadraticAssignmentProblem.cpp
-        source/HiringProblem.cpp
-        headers/NSGAII.hpp
-        source/WorkAssignment.cpp
-        headers/GeneticAlgorithm.hpp
-        source/JobShopProblem.cpp
-        source/GeneticQuadraticAssignment.cpp
-        source/GeneticJobShop.cpp
-        headers/DynamicMatrix.hpp
-        headers/SymmetricMatrix.hpp
-        headers/Solution.h
-        source/StochasticQuadraticAssignment.cpp
-        headers/SimulatedAnnealing.hpp
-        source/StopCondition.cpp
-        headers/StopCondition.h
-        source/TravelingSalesmanProblem.cpp
-        source/GeneticTravelingSalesman.cpp
-        headers/NSGAII.hpp
-        headers/RangesExt.h
-        headers/GeneticHiringProblem.h
-        source/GeneticHiringProblem.cpp
+        problems/QuadraticAssignmentProblem.cpp
+        problems/HiringProblem.cpp
+        solvers/NSGAII.hpp
+        utils/WorkAssignment.cpp
+        solvers/GeneticAlgorithm.hpp
+        problems/JobShopProblem.cpp
+        problems/GeneticQuadraticAssignment.cpp
+        problems/GeneticJobShop.cpp
+        utils/DynamicMatrix.hpp
+        utils/SymmetricMatrix.hpp
+        interfaces-and-templates/Solution.h
+        problems/StochasticQuadraticAssignment.cpp
+        solvers/SimulatedAnnealing.hpp
+        interfaces-and-templates/StopCondition.hpp
+        problems/TravelingSalesmanProblem.cpp
+        problems/GeneticTravelingSalesman.cpp
+        solvers/NSGAII.hpp
+        utils/RangesExt.h
+        problems/GeneticHiringProblem.h
+        problems/GeneticHiringProblem.cpp
+        solvers/HillClimb.hpp
+        utils/ConceptsExt.h
 )
 
 install()

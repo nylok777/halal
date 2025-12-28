@@ -4,22 +4,22 @@
 #include <chrono>
 #include <iostream>
 
-#include "GeneticAlgorithm.hpp"
-#include "GeneticJobShop.h"
-#include "GeneticHiringProblem.h"
-#include "NSGAII.hpp"
-#include "SimulatedAnnealing.hpp"
-#include "StochasticQuadraticAssignment.h"
+#include "solvers/GeneticAlgorithm.hpp"
+#include "problems/GeneticJobShop.h"
+#include "problems/GeneticHiringProblem.h"
+#include "solvers/NSGAII.hpp"
+#include "solvers/SimulatedAnnealing.hpp"
+#include "problems/StochasticQuadraticAssignment.h"
 
 void RunQuadraticAssignment()
 {
     const auto quadratic_assignment = std::make_shared<StochasticQuadraticAssignment>("els19.dat");
-    auto stop_cond = StopConditionMaxIterations{1000*1000};
+    StopConditionMinChangeRate stop_condition{0.1f, 11};
     BoltzmannScheduleTemperature temperature{1000.0f};
     const auto start = std::chrono::high_resolution_clock::now();
     const auto [rep, score] = SimulatedAnnealing(
         quadratic_assignment.get(),
-        stop_cond,
+        stop_condition,
         temperature,
         7.0f,
         11.0f);
@@ -33,16 +33,16 @@ void RunQuadraticAssignment()
 void RunJobshopScheduling()
 {
     const auto job_shop = std::make_shared<GeneticJobShop>(GeneticJobShop::LoadFromFile("la02.txt"));
-    StopConditionMaxIterations stop_condition{1000};
+    StopConditionMaxIterations stop_condition{3000};
     const auto start = std::chrono::high_resolution_clock::now();
     const auto [rep, score] = GeneticAlgorithm(
         job_shop.get(),
         stop_condition,
         2,
         100,
-        30,
-        60,
-        0.7f);
+        10,
+        50,
+        0.4f);
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto time = std::chrono::duration_cast<std::chrono::seconds>(finish-start);
     std::cout << score << std::endl;
@@ -53,7 +53,7 @@ void RunJobshopScheduling()
 auto RunWorkAssignment()
 {
     auto hiring_problem = std::make_shared<GeneticHiringProblem>("Salary.txt", 2);
-    auto stop_cond = StopConditionMaxIterations{1000};
+    auto stop_cond = StopConditionMaxIterations{10000};
     auto comparator = ParetoDominanceComparator{hiring_problem.get()};
 
     const auto start = std::chrono::high_resolution_clock::now();
@@ -83,5 +83,5 @@ auto main() -> int
 {
     RunQuadraticAssignment();
     RunJobshopScheduling();
-    RunWorkAssignment();
+    //RunWorkAssignment();
 };
