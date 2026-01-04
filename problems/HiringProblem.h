@@ -6,10 +6,11 @@
 #define HALAL_HIRINGPROBLEM_H
 #include "../interfaces-and-templates/OptimizationProblem.h"
 #include "../utils/WorkAssignment.h"
+#include "interfaces-and-templates/Chromosome.h"
 
 struct candidate_selection
 {
-    using ObjectiveReturnType = float;
+    using NumberType = float;
     std::vector<int> candidates;
     int pareto_rank = 0;
     int dominated_by = 0;
@@ -17,13 +18,15 @@ struct candidate_selection
     auto operator==(const candidate_selection& other) const -> bool;
 };
 
-class HiringProblem : public WorkAssignmentProblem, public ParetoOptimizationProblem<candidate_selection, float>
+class HiringProblem : public WorkAssignmentProblem, public ParetoOptimizationProblem<candidate_selection, float>, public Chromosome<candidate_selection>
 {
 public:
     HiringProblem() = default;
     explicit HiringProblem(const std::string& filename, const int n_people_to_hire);
     [[nodiscard]] auto GenerateInstance() const -> candidate_selection override;
     [[nodiscard]] auto GetObjectives() const -> std::vector<std::function<float(const candidate_selection&)>> override;
+    [[nodiscard]] auto CrossOver(const std::vector<candidate_selection>& parents) const -> candidate_selection override;
+    void Mutate(candidate_selection& child) const override;
 protected:
     [[nodiscard]] auto SumSalary(const candidate_selection& selection) const -> float;
     [[nodiscard]] auto AvgQuality(const candidate_selection& selection) const -> float;

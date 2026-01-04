@@ -48,7 +48,7 @@ auto SimulatedAnnealing(
     p.score = std::numeric_limits<typename T::NumberType>::max();
     auto best_element = p;
     int t = 0;
-    while (StopCondition(stop_condition, p.score)) {
+    while (!StopCondition(stop_condition, p.score)) {
         t++;
         const auto q = solvable->GenerateNeighbour(p, eps);
 

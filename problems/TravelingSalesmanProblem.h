@@ -6,6 +6,7 @@
 #define HALAL_TRAVELINGSALESMANPROBLEM_H
 #include <vector>
 #include "../interfaces-and-templates/OptimizationProblem.h"
+#include "interfaces-and-templates/Chromosome.h"
 
 using distance_from_location = std::pair<int, double>;
 
@@ -17,26 +18,25 @@ struct location
     std::vector<distance_from_location> distances;
 };
 
-struct route
+struct route : SolutionCandidate<std::vector<location>, double>
 {
-    using NumberType = double;
-    using RepresentationType = std::vector<location>;
-
-    std::vector<location> rep;
-    double score = 0.0;
     auto operator<(const route& other) const -> bool { return score < other.score; }
 };
 
-class TravelingSalesmanProblem : public OptimizationProblem<route, double>
+class TravelingSalesmanProblem : public OptimizationProblem<route>, public Chromosome<route>
 {
     using Locations = route::RepresentationType;
 public:
     explicit TravelingSalesmanProblem(std::vector<location>& all_locations);
     [[nodiscard]] auto GenerateInstance() const -> route override;
     [[nodiscard]] auto Objective(const Locations& locations) const -> double override;
-    [[nodiscard]] auto NumberOfLocations() const -> int;
+    [[nodiscard]] auto CrossOver(const std::vector<route>& parents) const -> route override;
+    void Mutate(route& child) const override;
+
 private:
     std::vector<location> all_locations;
 };
+
+std::vector<location> operator+(const std::vector<location>& locations, const std::vector<float>& steps);
 
 #endif //HALAL_TRAVELINGSALESMANPROBLEM_H

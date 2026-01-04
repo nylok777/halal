@@ -12,7 +12,7 @@
 
 template<std::ranges::input_range R>
 requires std::ranges::forward_range<R> && Solution<std::ranges::range_value_t<R>>
-auto Selection(R&& population, const int n_parents) -> std::ranges::view auto
+auto Selection(R& population, const int n_parents) -> std::ranges::view auto
 {
     std::ranges::sort(population, [](const auto& a, const auto& b) -> bool { return a.score < b.score; });
     return std::ranges::views::take(population, n_parents);
@@ -20,7 +20,7 @@ auto Selection(R&& population, const int n_parents) -> std::ranges::view auto
 
 template<std::ranges::input_range R1, std::ranges::input_range R2, class Gen>
 requires std::ranges::forward_range<R1> && std::ranges::forward_range<R2> && std::uniform_random_bit_generator<std::remove_reference_t<Gen>>
-void Reinsertion(R1&& population, R2&& new_gen, Gen&& gen)
+void Reinsertion(R1& population, R2& new_gen, Gen& gen)
 {
     std::ranges::shuffle(population, gen);
     std::ranges::copy(new_gen, std::ranges::begin(population));
@@ -50,7 +50,7 @@ auto GeneticAlgorithm(
     {
         return a.score < b.score;
     });
-    while (StopCondition(stop_condition, p_best.score)) {
+    while (!StopCondition(stop_condition, p_best.score)) {
         auto parents = Selection(population, parents_pool_size);
         std::vector <T> new_gen;
         new_gen.reserve(new_gen_size);

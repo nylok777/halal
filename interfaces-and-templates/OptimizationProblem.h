@@ -9,16 +9,36 @@
 
 #include <vector>
 
-template <Solution T, Numeric N>
+template <Solution T>
 class OptimizationProblem
 {
 public:
-    using NumberType = N;
+    using NumberType = T::NumberType;
     using SolutionType = T;
+    using Genotype = T::RepresentationType;
 
     virtual ~OptimizationProblem() = default;
     virtual auto GenerateInstance() const -> T = 0;
-    virtual auto Objective(const T::RepresentationType&) const -> N = 0;
+    virtual auto Objective(const Genotype&) const -> NumberType = 0;
+};
+
+template<typename T>
+concept IsSingleObjectiveProblem = std::is_base_of_v<OptimizationProblem<typename T::SolutionType>, T>;
+
+template <Solution T>
+class IRandomNeighbour
+{
+public:
+    virtual ~IRandomNeighbour() = default;
+    virtual auto GenerateNeighbour(const T&, float eps) const -> T = 0;
+};
+
+template<Solution T>
+class IDirectNeighbour
+{
+public:
+    virtual ~IDirectNeighbour() = default;
+    virtual auto GetDirectNeighbour(const T& elem, float eps) const -> T = 0;
 };
 
 template<ParetoSolution T, Numeric N>

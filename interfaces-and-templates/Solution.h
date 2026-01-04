@@ -7,24 +7,30 @@
 #include "../utils/ConceptsExt.h"
 #include <ranges>
 
-template<typename T, typename = void>
-struct has_numeric_field : std::false_type {};
-
-template<typename T>
-struct has_numeric_field<T, std::void_t<typename T::NumberType>> : std::true_type {};
+// template<typename T, typename = void>
+// struct has_numeric_field : std::false_type {};
+//
+// template<typename T>
+// struct has_numeric_field<T, std::void_t<typename T::NumberType>> : std::true_type {};
 
 template<typename T, typename = void>
 struct has_objective_func : std::false_type {};
 
 template<typename T>
-struct has_objective_func<T, std::void_t<typename T::ObjectiveReturnType>> : std::true_type {};
+struct has_objective_func<T, std::void_t<typename T::NumberType>> : std::true_type {};
 
-template <typename T, typename P = T::RepresentationType>
-concept Solution = has_numeric_field<T>::value && requires(T sol)
+template<typename R, Numeric N>
+struct SolutionCandidate
 {
-    { sol.rep };
-    { sol.score } -> Numeric;
+    using RepresentationType = R;
+    using NumberType = N;
+
+    R genotype;
+    N score;
 };
+
+template <typename S, typename R = S::RepresentationType, typename N = S::NumberType>
+concept Solution = std::is_base_of_v<SolutionCandidate<R, N>, S>;
 
 template <typename T>
 concept ParetoSolution = has_objective_func<T>::value && requires(T t)

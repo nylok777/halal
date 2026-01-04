@@ -7,20 +7,14 @@
 #include <vector>
 
 #include "JobShopProblem.h"
-#include "../interfaces-and-templates/OptimizationProblem.h"
-#include "../utils/SymmetricMatrix.hpp"
+#include "OptimizationProblem.h"
+#include "SymmetricMatrix.hpp"
+#include "Chromosome.h"
 
-struct assignment
-{
-    using NumberType = float;
-    using RepresentationType = std::vector<int>;
-
-    std::vector<int> rep;
-    float score;
-};
+struct assignment : SolutionCandidate<std::vector<int>, float> {};
 
 class QuadraticAssignmentProblem
-    : public OptimizationProblem<assignment, float>
+    : public OptimizationProblem<assignment>, public IRandomNeighbour<assignment>, public Chromosome<assignment>
 {
     using Placements = std::vector<int>;
 public:
@@ -31,6 +25,11 @@ public:
     [[nodiscard]] auto Objective(const Placements& placements) const -> float override;
 
     [[nodiscard]] auto ProblemSize() const -> int;
+
+    [[nodiscard]] auto GenerateNeighbour(const assignment& p, float eps) const -> assignment override;
+    [[nodiscard]] auto CrossOver(const std::vector<assignment>& parents) const -> assignment override;
+
+    void Mutate(assignment& child) const override;
 
 private:
     int n = 0;

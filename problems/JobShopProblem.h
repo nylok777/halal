@@ -8,6 +8,7 @@
 #include <iosfwd>
 #include "../utils/DynamicMatrix.hpp"
 #include "../interfaces-and-templates/OptimizationProblem.h"
+#include "interfaces-and-templates/Chromosome.h"
 
 struct operation
 {
@@ -23,47 +24,27 @@ struct operation
     friend auto operator<<(std::ostream& stream, const operation& operation) -> std::ostream&;
 };
 
-struct jobshop_schedule
+struct jobshop_schedule : SolutionCandidate<DynamicMatrix<operation>, float>
 {
-    using NumberType = float;
-    using RepresentationType = DynamicMatrix<operation>;
-
-    DynamicMatrix<operation> rep;
-    float score = 0.0f;
     auto operator<(const jobshop_schedule& other) const -> bool { return score < other.score; }
 };
 
-class JobShopProblem : public OptimizationProblem<jobshop_schedule, float>
+class JobShopProblem : public OptimizationProblem<jobshop_schedule>, public Chromosome<jobshop_schedule>
 {
     using ScheduleMatrix = jobshop_schedule::RepresentationType;
 public:
     JobShopProblem(int machines_num, int jobs_num, std::vector<operation>& ops);
 
     static auto LoadFromFile(const std::string& path) -> JobShopProblem;
-
-    [[nodiscard]] auto Objective(const ScheduleMatrix&) const -> float override;
-
+    [[nodiscard]] auto Objective(const ScheduleMatrix& schedule) const -> float override;
     [[nodiscard]] auto GenerateInstance() const -> jobshop_schedule override;
-
-    [[nodiscard]] auto GetOperations() const -> const std::vector<operation>&;
-
-    [[nodiscard]] auto NumberOfMachines() const -> int;
-
-    [[nodiscard]] auto NumberOfOperations() const -> int;
-
-    [[nodiscard]] auto NumberOfJobs() const -> int;
+    [[nodiscard]] auto CrossOver(const std::vector<jobshop_schedule>& parents) const -> jobshop_schedule override;
+    void Mutate(jobshop_schedule& child) const override;
 
 private:
     std::vector<operation> operations;
     int machines_num;
     int jobs_num;
 };
-
-auto ActiveScheduleFromInactive(
-    const int n_operations,
-    const int n_jobs,
-    const int n_machines,
-    std::vector<operation>&& operations,
-    DynamicMatrix<operation>& schedule) -> jobshop_schedule;
 
 #endif //HALAL_JOBSHOPPROBLEM_H

@@ -20,7 +20,7 @@ auto SolveTspInstance(std::vector<location>& all_delivery_points) -> std::vector
         100,
         10,
         50,
-        0.5f).rep;
+        0.5f).genotype;
     return result;
 }
 

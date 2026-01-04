@@ -20,7 +20,7 @@ namespace ranges = std::ranges;
 
 template<ranges::forward_range R, typename T = ranges::range_value_t<R>>
 requires ParetoSolution<T>
-void NonDominatedSort(R&& elements, IParetoDominanceComparator<T>& comparator)
+void NonDominatedSort(R& elements, IParetoDominanceComparator<T>& comparator)
 {
     std::vector<int> pareto_front;
     DynamicMatrix<int> dominated_matrix(elements.size());
@@ -62,10 +62,10 @@ void NonDominatedSort(R&& elements, IParetoDominanceComparator<T>& comparator)
 template <ranges::input_range R, ranges::forward_range RG,
     typename T = ranges::range_value_t<R>,
     typename IterT = ranges::iterator_t<R>,
-    typename N = T::ObjectiveReturnType>
+    typename N = T::NumberType>
 requires ParetoSolution<T>
-auto CrowdingDistance(R&& elements,
-                      RG&& objectives) -> std::vector<std::pair<IterT, N>>
+auto CrowdingDistance(R& elements,
+                      RG& objectives) -> std::vector<std::pair<IterT, N>>
 {
     std::vector<std::pair<IterT, N>> crowding_distances;
     for (auto it = ranges::begin(elements); it != ranges::end(elements); ++it) {
@@ -91,7 +91,7 @@ auto CrowdingDistance(R&& elements,
 
 template<ranges::forward_range R, ranges::forward_range RG, typename T = ranges::range_value_t<R>>
 requires ParetoSolution<T>
-auto NSGAIISelection(R&& population, R&& next_gen, RG&& objectives, const int population_size,
+auto NSGAIISelection(R& population, R& next_gen, RG& objectives, const int population_size,
                      IParetoDominanceComparator<T>& comparator)
 {
     std::vector<T> selected;
@@ -149,7 +149,7 @@ auto NSGAII(
     for (int i = 0; std::cmp_less(i , population_size); ++i) {
         population.push_back(problem->GenerateInstance());
     }
-    while (StopCondition(stop_condition, 0.0f)) {
+    while (!StopCondition(stop_condition, 0.0f)) {
         auto objectives = problem->GetObjectives();
         population = NSGAIISelection(population, new_gen, objectives, population_size, comparator);
         population.erase(population.begin() + population_size, population.end());

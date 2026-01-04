@@ -4,20 +4,19 @@
 #include <chrono>
 #include <iostream>
 
+#include "problems/HiringProblem.h"
 #include "solvers/GeneticAlgorithm.hpp"
-#include "problems/GeneticJobShop.h"
-#include "problems/GeneticHiringProblem.h"
+#include "problems/QuadraticAssignmentProblem.h"
 #include "solvers/NSGAII.hpp"
 #include "solvers/SimulatedAnnealing.hpp"
-#include "problems/StochasticQuadraticAssignment.h"
 
 void RunQuadraticAssignment()
 {
-    const auto quadratic_assignment = std::make_shared<StochasticQuadraticAssignment>("els19.dat");
+    const auto quadratic_assignment = std::make_shared<QuadraticAssignmentProblem>("els19.dat");
     StopConditionMinChangeRate stop_condition{0.1f, 11};
     BoltzmannScheduleTemperature temperature{1000.0f};
     const auto start = std::chrono::high_resolution_clock::now();
-    const auto [rep, score] = SimulatedAnnealing(
+    const auto sol = SimulatedAnnealing(
         quadratic_assignment.get(),
         stop_condition,
         temperature,
@@ -25,17 +24,17 @@ void RunQuadraticAssignment()
         11.0f);
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto time = std::chrono::duration_cast<std::chrono::seconds>(finish-start);
-    std::cout << score << std::endl;
+    std::cout << sol.score << std::endl;
     std::cout << time.count() << "s" << std::endl;
 
 }
 
 void RunJobshopScheduling()
 {
-    const auto job_shop = std::make_shared<GeneticJobShop>(GeneticJobShop::LoadFromFile("la02.txt"));
+    const auto job_shop = std::make_shared<JobShopProblem>(JobShopProblem::LoadFromFile("la02.txt"));
     StopConditionMaxIterations stop_condition{3000};
     const auto start = std::chrono::high_resolution_clock::now();
-    const auto [rep, score] = GeneticAlgorithm(
+    const auto sol = GeneticAlgorithm(
         job_shop.get(),
         stop_condition,
         2,
@@ -45,14 +44,14 @@ void RunJobshopScheduling()
         0.4f);
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto time = std::chrono::duration_cast<std::chrono::seconds>(finish-start);
-    std::cout << score << std::endl;
+    std::cout << sol.score << std::endl;
     std::cout << time.count() << "s" << std::endl;
 
 }
 
 auto RunWorkAssignment()
 {
-    auto hiring_problem = std::make_shared<GeneticHiringProblem>("Salary.txt", 2);
+    auto hiring_problem = std::make_shared<HiringProblem>("Salary.txt", 2);
     auto stop_cond = StopConditionMaxIterations{10000};
     auto comparator = ParetoDominanceComparator{hiring_problem.get()};
 

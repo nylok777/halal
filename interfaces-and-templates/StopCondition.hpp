@@ -5,6 +5,7 @@
 #ifndef HALAL_STOPCONDITION_H
 #define HALAL_STOPCONDITION_H
 #include <concepts>
+#include <cmath>
 #include "../utils/ConceptsExt.h"
 
 
@@ -54,7 +55,7 @@ public:
             fails_count = 0;
         }
         last_score_f = score_f;
-        return fails_count < max_fails;
+        return fails_count > max_fails;
     }
 
 private:
@@ -73,7 +74,7 @@ public:
     bool operator()()
     {
         ++iter_count;
-        return iter_count < max_iters;
+        return iter_count > max_iters;
     }
 
 private:

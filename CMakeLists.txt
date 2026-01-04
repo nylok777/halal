@@ -6,7 +6,6 @@ include(GNUInstallDirs)
 
 add_library(tsp_solver SHARED
         problems/TravelingSalesmanProblem.cpp
-        problems/GeneticTravelingSalesman.cpp
         interfaces-and-templates/Solution.h
         solvers/GeneticAlgorithm.hpp
         tsp_solver.cpp
@@ -23,6 +22,7 @@ set_target_properties(tsp_solver PROPERTIES
 
 include_directories(.)
 include_directories("utils")
+include_directories("interfaces-and-templates")
 
 install(TARGETS tsp_solver
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -37,22 +37,22 @@ add_executable(halal
         utils/WorkAssignment.cpp
         solvers/GeneticAlgorithm.hpp
         problems/JobShopProblem.cpp
-        problems/GeneticQuadraticAssignment.cpp
-        problems/GeneticJobShop.cpp
         utils/DynamicMatrix.hpp
         utils/SymmetricMatrix.hpp
         interfaces-and-templates/Solution.h
-        problems/StochasticQuadraticAssignment.cpp
         solvers/SimulatedAnnealing.hpp
         interfaces-and-templates/StopCondition.hpp
         problems/TravelingSalesmanProblem.cpp
-        problems/GeneticTravelingSalesman.cpp
         solvers/NSGAII.hpp
         utils/RangesExt.h
-        problems/GeneticHiringProblem.h
-        problems/GeneticHiringProblem.cpp
         solvers/HillClimb.hpp
         utils/ConceptsExt.h
+        solvers/RandomSearch.hpp
+        solvers/TabooSearch.hpp
+        utils/SmallestBoundaryPolygon.cpp
+        problems/PolygonProblem.cpp
+        problems/PolygonProblem.h
+        utils/Matrix.hpp
 )
 
 install()
