@@ -37,10 +37,10 @@ void RunJobshopScheduling()
     const auto sol = GeneticAlgorithm(
         job_shop.get(),
         stop_condition,
-        2,
-        100,
-        10,
-        50,
+        100u,
+        2u,
+        10u,
+        50u,
         0.4f);
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto time = std::chrono::duration_cast<std::chrono::seconds>(finish-start);
@@ -51,7 +51,7 @@ void RunJobshopScheduling()
 
 auto RunWorkAssignment()
 {
-    auto hiring_problem = std::make_shared<HiringProblem>("Salary.txt", 2);
+    auto hiring_problem = std::make_unique<HiringProblem>("Salary.txt", 2);
     auto stop_cond = StopConditionMaxIterations{10000};
     auto comparator = ParetoDominanceComparator{hiring_problem.get()};
 

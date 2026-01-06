@@ -5,14 +5,13 @@
 #ifndef HALAL_NSGAIISOLVER_HPP
 #define HALAL_NSGAIISOLVER_HPP
 #include <algorithm>
-#include <memory>
 #include <random>
 #include <set>
 #include <utility>
 
 #include "../interfaces-and-templates/Chromosome.h"
 #include "../interfaces-and-templates/OptimizationProblem.h"
-#include "../utils/RangesExt.h"
+#include "ranges_ext.hpp"
 #include "../interfaces-and-templates/Solution.h"
 #include "../interfaces-and-templates/StopCondition.hpp"
 

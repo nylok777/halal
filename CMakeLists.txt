@@ -44,7 +44,6 @@ add_executable(halal
         interfaces-and-templates/StopCondition.hpp
         problems/TravelingSalesmanProblem.cpp
         solvers/NSGAII.hpp
-        utils/RangesExt.h
         solvers/HillClimb.hpp
         utils/ConceptsExt.h
         solvers/RandomSearch.hpp
