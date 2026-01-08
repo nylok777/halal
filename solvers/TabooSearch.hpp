@@ -46,7 +46,7 @@ private:
     size_t max_elements;
 };
 
-template<IsSingleObjectiveProblem P, StopConditionFunctor S, typename C, typename T = P::SolutionType>
+template<SingleObjectiveProblem P, StopConditionFunctor S, typename C, typename T = P::SolutionType>
 requires Solution<T> && std::is_base_of_v<IDirectNeighbour<T>, P>
 T TabooSearch(
     const P* const solvable,
@@ -54,9 +54,9 @@ T TabooSearch(
     const TabooList<C>* taboo_list,
     const float epsilon)
 {
-    auto p_opt = solvable->GenerateInstance();
+    auto p_opt = solvable->GenerateSolution();
     while (!StopCondition(stop_condition, p_opt.score)) {
-        auto p = solvable->GenerateInstance();
+        auto p = solvable->GenerateSolution();
         bool stuck = false;
         while (!StopCondition(stop_condition, p.score) && !taboo_list->IsTaboo(p) && !stuck) {
             if (p.score < p_opt.score) {

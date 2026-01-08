@@ -18,12 +18,12 @@ public:
     using Genotype = T::RepresentationType;
 
     virtual ~OptimizationProblem() = default;
-    virtual auto GenerateInstance() const -> T = 0;
+    virtual auto GenerateSolution() const -> T = 0;
     virtual auto Objective(const Genotype&) const -> NumberType = 0;
 };
 
 template<typename T>
-concept IsSingleObjectiveProblem = std::is_base_of_v<OptimizationProblem<typename T::SolutionType>, T>;
+concept SingleObjectiveProblem = std::is_base_of_v<OptimizationProblem<typename T::SolutionType>, T>;
 
 template <Solution T>
 class IRandomNeighbour
@@ -48,7 +48,7 @@ public:
     using NumberType = N;
     using SolutionType = T;
     virtual ~ParetoOptimizationProblem() = default;
-    virtual auto GenerateInstance() const -> T = 0;
+    virtual auto GenerateSolution() const -> T = 0;
     virtual auto GetObjectives() const -> std::vector<std::function<N(const T&)>> = 0;
 };
 

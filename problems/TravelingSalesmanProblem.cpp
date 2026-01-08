@@ -15,7 +15,7 @@ location::location(const int id, std::vector<distance_from_location>& distances)
 TravelingSalesmanProblem::TravelingSalesmanProblem(std::vector<location>& all_locations)
     : all_locations(std::move(all_locations)){}
 
-auto TravelingSalesmanProblem::GenerateInstance() const -> route
+auto TravelingSalesmanProblem::GenerateSolution() const -> route
 {
     std::mt19937 gen{std::random_device{}()};
     std::vector<location> locations = all_locations;

@@ -30,7 +30,10 @@ struct SolutionCandidate
 };
 
 template <typename S, typename R = S::RepresentationType, typename N = S::NumberType>
-concept Solution = std::is_base_of_v<SolutionCandidate<R, N>, S>;
+concept Solution = std::is_base_of_v<SolutionCandidate<R, N>, S> || requires(S& sol) {
+    {sol.genotype} -> std::same_as<R>;
+    {sol.score} -> Numeric;
+};
 
 template <typename T>
 concept ParetoSolution = has_objective_func<T>::value && requires(T t)

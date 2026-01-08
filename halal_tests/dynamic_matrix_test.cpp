@@ -2,8 +2,7 @@
 // Created by david on 10/24/25.
 //
 #include "gtest/gtest.h"
-#include "headers/DynamicMatrix.hpp"
-
+#include "DynamicMatrix.hpp"
 
 class DynamicMatrixTest : public ::testing::Test
 {

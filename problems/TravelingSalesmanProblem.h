@@ -28,7 +28,7 @@ class TravelingSalesmanProblem : public OptimizationProblem<route>, public Chrom
     using Locations = route::RepresentationType;
 public:
     explicit TravelingSalesmanProblem(std::vector<location>& all_locations);
-    [[nodiscard]] auto GenerateInstance() const -> route override;
+    [[nodiscard]] auto GenerateSolution() const -> route override;
     [[nodiscard]] auto Objective(const Locations& locations) const -> double override;
     [[nodiscard]] auto CrossOver(const std::vector<route>& parents) const -> route override;
     void Mutate(route& child) const override;

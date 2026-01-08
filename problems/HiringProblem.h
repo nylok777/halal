@@ -23,7 +23,7 @@ class HiringProblem : public WorkAssignmentProblem, public ParetoOptimizationPro
 public:
     HiringProblem() = default;
     explicit HiringProblem(const std::string& filename, const int n_people_to_hire);
-    [[nodiscard]] auto GenerateInstance() const -> candidate_selection override;
+    [[nodiscard]] auto GenerateSolution() const -> candidate_selection override;
     [[nodiscard]] auto GetObjectives() const -> std::vector<std::function<float(const candidate_selection&)>> override;
     [[nodiscard]] auto CrossOver(const std::vector<candidate_selection>& parents) const -> candidate_selection override;
     void Mutate(candidate_selection& child) const override;

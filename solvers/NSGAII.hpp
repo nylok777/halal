@@ -146,7 +146,7 @@ auto NSGAII(
     std::set<T> best;
     std::mt19937 gen{std::random_device{}()};
     for (int i = 0; std::cmp_less(i , population_size); ++i) {
-        population.push_back(problem->GenerateInstance());
+        population.push_back(problem->GenerateSolution());
     }
     while (!StopCondition(stop_condition, 0.0f)) {
         auto objectives = problem->GetObjectives();

@@ -37,7 +37,7 @@ public:
 
     static auto LoadFromFile(const std::string& path) -> JobShopProblem;
     [[nodiscard]] auto Objective(const ScheduleMatrix& schedule) const -> float override;
-    [[nodiscard]] auto GenerateInstance() const -> jobshop_schedule override;
+    [[nodiscard]] auto GenerateSolution() const -> jobshop_schedule override;
     [[nodiscard]] auto CrossOver(const std::vector<jobshop_schedule>& parents) const -> jobshop_schedule override;
     void Mutate(jobshop_schedule& child) const override;
 

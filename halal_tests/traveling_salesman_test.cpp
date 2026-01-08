@@ -1,14 +1,15 @@
 //
 // Created by david on 11/25/25.
 //
+#include <algorithm>
 #include <random>
 #include <ranges>
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "headers/GeneticAlgorithm.hpp"
-#include "headers/GeneticTravelingSalesman.h"
-#include "headers/location.h"
+#include "GeneticAlgorithm.hpp"
+#include "StopCondition.hpp"
+#include "TravelingSalesmanProblem.h"
 
 class TravelingSalesmanTest : public ::testing::Test
 {
@@ -59,13 +60,19 @@ TEST_F(TravelingSalesmanTest, GeneratePointsTest)
 TEST_F(TravelingSalesmanTest, GeneticAlgorithmTest)
 {
     std::vector<location> locs = GeneratePoints(5);
-    GeneticTravelingSalesman tsp{locs};
-    auto tsp_ptr = std::make_unique<GeneticTravelingSalesman>(tsp);
-    GeneticAlgorithmSolver<route, StopConditionMaxIterations> solver{std::move(tsp_ptr), StopConditionMaxIterations{100}};
-    auto result = solver.GeneticAlgorithm(5, 100, 25, 50, 0.5f);
-    ASSERT_EQ(result.rep.size(), 5);
+    TravelingSalesmanProblem tsp{locs};
+    StopConditionMaxIterations st{100};
+    auto tsp_ptr = std::make_unique<TravelingSalesmanProblem>(tsp);
+    auto result = GeneticAlgorithm(tsp_ptr.get(),
+        st,
+        100,
+        2,
+        50,
+        50,
+        0.5f);
+    ASSERT_EQ(result.genotype.size(), 5);
     std::vector<int> ids; ids.reserve(5);
-    std::ranges::transform(result.rep, std::back_inserter(ids), [](auto& x) { return x.id; });
+    std::ranges::transform(result.genotype, std::back_inserter(ids), [](auto& x) { return x.id; });
     auto [first, last] = std::ranges::unique(ids);
     ids.erase(first, last);
     ASSERT_EQ(ids.size(), 5);

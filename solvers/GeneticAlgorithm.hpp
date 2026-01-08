@@ -96,7 +96,7 @@ T GeneticAlgorithm(
     std::vector<T> population;
     population.reserve(population_size);
     for (int i = 0; i < population_size; ++i) {
-        population.push_back(solvable->GenerateInstance());
+        population.push_back(solvable->GenerateSolution());
     }
     auto p_best = *std::ranges::min_element(population, [](const auto& a, const auto& b) -> bool
     {

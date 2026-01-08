@@ -42,7 +42,7 @@ T RandomSearch(
 {
     std::mt19937 gen{std::random_device{}()};
     std::vector<float> steps(mean.size());
-    auto p = solvable->GenerateInstance();
+    auto p = solvable->GenerateSolution();
     while (!StopCondition(std::forward<S>(stop_condition), p.score)) {
         for (size_t i = 0; i < steps.size(); ++i) {
             std::normal_distribution dist{mean.at(i), std_deviance.at(i)};

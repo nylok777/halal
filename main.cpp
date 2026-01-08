@@ -5,9 +5,11 @@
 #include <iostream>
 
 #include "problems/HiringProblem.h"
+#include "problems/PolygonProblem.h"
 #include "solvers/GeneticAlgorithm.hpp"
 #include "problems/QuadraticAssignmentProblem.h"
 #include "solvers/NSGAII.hpp"
+#include "solvers/ParticleSwarmOptimization.hpp"
 #include "solvers/SimulatedAnnealing.hpp"
 
 void RunQuadraticAssignment()
@@ -82,5 +84,5 @@ auto main() -> int
 {
     RunQuadraticAssignment();
     RunJobshopScheduling();
-    //RunWorkAssignment();
+    RunWorkAssignment();
 };

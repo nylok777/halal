@@ -224,7 +224,7 @@ auto JobShopProblem::Objective(const ScheduleMatrix& schedule) const -> float
     return *std::ranges::max_element(jobs_ready_time);
 }
 
-auto JobShopProblem::GenerateInstance() const -> jobshop_schedule
+auto JobShopProblem::GenerateSolution() const -> jobshop_schedule
 {
     GifflerThompson gt{jobs_num, machines_num};
     return gt(

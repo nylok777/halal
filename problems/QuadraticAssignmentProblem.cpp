@@ -29,7 +29,7 @@ QuadraticAssignmentProblem::QuadraticAssignmentProblem(const std::string& filena
     }
 }
 
-auto QuadraticAssignmentProblem::GenerateInstance() const -> assignment
+auto QuadraticAssignmentProblem::GenerateSolution() const -> assignment
 {
     std::random_device rnd;
     std::mt19937 gen{rnd()};

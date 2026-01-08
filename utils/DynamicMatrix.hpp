@@ -60,10 +60,11 @@ public:
         auto operator->() -> T*;
         friend auto DynamicMatrix::begin() -> iterator;
         friend auto DynamicMatrix::end() -> iterator;
+        iterator(const iterator& iter);
     private:
+        explicit iterator(std::map<int, std::vector<T>>& current);
         explicit iterator(const std::map<int, std::vector<T>>& current);
         iterator(std::vector<T>* const end_row, std::map<int, std::vector<T>>* const end);
-        iterator(const iterator& iter);
 
         std::map<int, std::vector<T>>::iterator current_row;
         std::vector<T>::iterator current_vec_iter;
@@ -305,11 +306,20 @@ auto DynamicMatrix<T>::iterator::operator->() -> T*
 }
 
 template <typename T>
+DynamicMatrix<T>::iterator::iterator(std::map<int, std::vector<T>>& current)
+    :
+    current_row(current.begin()),
+    current_vec_iter(current.begin()->second.begin()),
+    current_vec_begin(current.begin()->second.begin()),
+    current_vec_end(current.begin()->second.end()),
+    matrix_end(current.end()) {}
+
+template <typename T>
 DynamicMatrix<T>::iterator::iterator(const std::map<int, std::vector<T>>& current)
     :
     current_row(current.begin()),
     current_vec_iter(current.begin()->second.begin()),
-    current_vec_begin(current_vec_iter),
+    current_vec_begin(current.begin()->second.begin()),
     current_vec_end(current.begin()->second.end()),
     matrix_end(current.end()) {}
 
@@ -394,7 +404,7 @@ DynamicMatrix<T>::const_iterator::const_iterator(
     matrix_end(end->cend()) {}
 
 template <typename T>
-auto DynamicMatrix<T>::begin() -> iterator { return iterator{&rows}; }
+auto DynamicMatrix<T>::begin() -> iterator { return iterator{rows}; }
 
 template <typename T>
 auto DynamicMatrix<T>::end() -> iterator { return iterator{&rows.rbegin()->second, &rows}; }

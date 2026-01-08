@@ -16,7 +16,7 @@ class PolygonProblem
 {
 public:
     explicit PolygonProblem(const std::string& filename);
-    [[nodiscard]] auto GenerateInstance() const -> polygon override;
+    [[nodiscard]] auto GenerateSolution() const -> polygon override;
     [[nodiscard]] auto Objective(const Genotype& solution) const -> NumberType override;
     [[nodiscard]] auto GetDirectNeighbour(const polygon& elem, float eps) const -> polygon override;
 };

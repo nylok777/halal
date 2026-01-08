@@ -20,7 +20,7 @@ class QuadraticAssignmentProblem
 public:
     explicit QuadraticAssignmentProblem(const std::string& filename);
 
-    [[nodiscard]] auto GenerateInstance() const -> assignment override;
+    [[nodiscard]] auto GenerateSolution() const -> assignment override;
 
     [[nodiscard]] auto Objective(const Placements& placements) const -> float override;
 

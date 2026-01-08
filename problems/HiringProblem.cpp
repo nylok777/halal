@@ -23,7 +23,7 @@ HiringProblem::HiringProblem(const std::string& filename, const int n_people_to_
     WorkAssignmentProblem::loadFromFile(filename);
 }
 
-auto HiringProblem::GenerateInstance() const -> candidate_selection
+auto HiringProblem::GenerateSolution() const -> candidate_selection
 {
     std::mt19937 gen{std::random_device{}()};
     std::uniform_real_distribution<float> dist;

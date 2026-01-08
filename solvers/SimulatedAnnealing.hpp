@@ -44,7 +44,7 @@ auto SimulatedAnnealing(
     std::mt19937 gen{rnd()};
     std::uniform_real_distribution<> real_range;
 
-    auto p = solvable->GenerateInstance();
+    auto p = solvable->GenerateSolution();
     p.score = std::numeric_limits<typename T::NumberType>::max();
     auto best_element = p;
     int t = 0;

@@ -13,7 +13,7 @@ PolygonProblem::PolygonProblem(const std::string& filename)
     loadPointsFromFile(filename);
 }
 
-auto PolygonProblem::GenerateInstance() const -> polygon
+auto PolygonProblem::GenerateSolution() const -> polygon
 {
     std::mt19937 gen{std::random_device{}()};
     std::uniform_real_distribution<float> dist;
@@ -60,10 +60,14 @@ auto PolygonProblem::GetDirectNeighbour(const polygon& elem, float eps) const ->
         }
     }
     auto best = neighbours.row(0);
+    auto fitness = objective(static_cast<std::vector<Point>>(best));
     for (size_t i = 1; i < directions; ++i) {
-        if (auto& q = neighbours.row(i);
-            objective(static_cast<std::vector<Point>>(q)) < objective(static_cast<std::vector<Point>>(best))) {
+        auto& q = neighbours.row(i);
+        auto q_fit = objective(static_cast<std::vector<Point>>(q));
+        if (q_fit < fitness) {
             best = q;
+            fitness = q_fit;
         }
     }
+    return polygon{static_cast<std::vector<Point>>(best), fitness};
 }

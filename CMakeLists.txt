@@ -8,7 +8,6 @@ add_library(tsp_solver SHARED
         problems/TravelingSalesmanProblem.cpp
         interfaces-and-templates/Solution.h
         solvers/GeneticAlgorithm.hpp
-        tsp_solver.cpp
 )
 
 set(TSP_HEADERS
