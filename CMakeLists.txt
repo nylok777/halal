@@ -24,6 +24,7 @@ set_target_properties(tsp_solver PROPERTIES
 
 include_directories(.)
 include_directories("headers")
+target_include_directories(tsp_solver PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
 install(TARGETS tsp_solver
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
